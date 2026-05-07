@@ -4,6 +4,9 @@
 .env.production
 .env.*.local
 
+# Local SQLite database (use Turso/PlanetScale in production)
+sqlite.db
+
 # Logs
 logs
 *.log
