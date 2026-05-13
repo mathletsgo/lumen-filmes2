@@ -9,6 +9,8 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 export default defineConfig({
   cloudflare: false,
   tanstackStart: {
-    ssr: false,
+    server: {
+      preset: "vercel",
+    },
   },
 });
