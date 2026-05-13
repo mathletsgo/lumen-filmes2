@@ -10,7 +10,7 @@ export default defineConfig({
   cloudflare: false,
   tanstackStart: {
     server: {
-      preset: "vercel",
+      preset: "netlify",
     },
   },
 });
