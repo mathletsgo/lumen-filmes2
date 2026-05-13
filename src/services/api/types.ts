@@ -15,7 +15,12 @@ export interface TmdbMovie {
   genres?: { id: number; name: string }[];
   original_language?: string;
   adult?: boolean;
-  belongs_to_collection?: { id: number; name: string; poster_path: string | null; backdrop_path: string | null } | null;
+  belongs_to_collection?: {
+    id: number;
+    name: string;
+    poster_path: string | null;
+    backdrop_path: string | null;
+  } | null;
 }
 
 export interface TmdbPaginated<T> {
@@ -35,8 +40,20 @@ export interface TmdbVideo {
 }
 
 export interface TmdbCredits {
-  cast: { id: number; name: string; character: string; profile_path: string | null; order: number }[];
-  crew: { id: number; name: string; job: string; department: string; profile_path?: string | null }[];
+  cast: {
+    id: number;
+    name: string;
+    character: string;
+    profile_path: string | null;
+    order: number;
+  }[];
+  crew: {
+    id: number;
+    name: string;
+    job: string;
+    department: string;
+    profile_path?: string | null;
+  }[];
 }
 
 export interface TmdbGenre {
@@ -55,11 +72,13 @@ export interface TmdbCollection {
 
 // Normalized Movie used across the app
 export interface Movie {
+  type: "movie";
   id: string;
   title: string;
   poster: string;
   backdrop: string;
   year: number;
+  releaseDate: string;
   duration: string;
   rating: number;
   genres: string[];
@@ -79,4 +98,26 @@ export interface Movie {
     magnet: string;
     torrent: string;
   }[];
+}
+
+export interface CastMember {
+  id: number;
+  name: string;
+  role: string;
+  photo?: string;
+}
+
+export interface WatchProviderItem {
+  provider_id: number;
+  provider_name: string;
+  logo_path: string | null;
+  display_priority: number;
+}
+
+export interface WatchProviders {
+  link: string;
+  flatrate?: WatchProviderItem[];
+  rent?: WatchProviderItem[];
+  buy?: WatchProviderItem[];
+  cinema?: WatchProviderItem[];
 }

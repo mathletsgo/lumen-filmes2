@@ -1,10 +1,11 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type PanInfo } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { Play, Info, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import type { Movie } from "@/data/movies";
 import { AgeBadge } from "@/components/AgeBadge";
 import { useCertification } from "@/hooks/useCertification";
+import { getAverageColor, updateThemeColor } from "@/lib/colorUtils";
 
 interface Props {
   movies: Movie[];
@@ -12,12 +13,15 @@ interface Props {
 }
 
 export function HeroBanner({ movies, interval = 7000 }: Props) {
-  const slides = movies.slice(0, 5);
+  const slides = movies.slice(0, 8);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
   const next = useCallback(() => setIndex((i) => (i + 1) % slides.length), [slides.length]);
-  const prev = useCallback(() => setIndex((i) => (i - 1 + slides.length) % slides.length), [slides.length]);
+  const prev = useCallback(
+    () => setIndex((i) => (i - 1 + slides.length) % slides.length),
+    [slides.length],
+  );
 
   useEffect(() => {
     if (paused || slides.length <= 1) return;
@@ -25,14 +29,38 @@ export function HeroBanner({ movies, interval = 7000 }: Props) {
     return () => clearInterval(t);
   }, [paused, next, interval, slides.length]);
 
+  // Dynamic theme color based on the current slide
+  useEffect(() => {
+    const backdrop = slides[index]?.backdrop;
+    if (backdrop) {
+      getAverageColor(backdrop).then((color) => {
+        updateThemeColor(color);
+      });
+    }
+    return () => {
+      // Revert to black when navigating away from the banner
+      updateThemeColor("#000000");
+    };
+  }, [slides, index]);
+
   if (slides.length === 0) return null;
   const current = slides[index];
 
+  const handlePanEnd = (event: any, info: PanInfo) => {
+    const threshold = 50;
+    if (info.offset.x < -threshold) {
+      next(); // Swiped left
+    } else if (info.offset.x > threshold) {
+      prev(); // Swiped right
+    }
+  };
+
   return (
-    <section
+    <motion.section
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      className="relative h-[92vh] min-h-[560px] sm:min-h-[640px] w-full overflow-hidden"
+      onPanEnd={handlePanEnd}
+      className="relative h-[65vh] min-h-[420px] sm:h-[85vh] sm:min-h-[640px] w-full overflow-hidden touch-pan-y select-none"
     >
       {/* Backdrop crossfade */}
       <AnimatePresence mode="sync">
@@ -55,12 +83,15 @@ export function HeroBanner({ movies, interval = 7000 }: Props) {
       </AnimatePresence>
 
       {/* Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
+      <div 
+        className="absolute inset-0" 
+        style={{ background: "linear-gradient(to right, hsl(var(--background)) 20%, transparent 100%)" }}
+      />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
       <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent pointer-events-none" />
 
       {/* Content */}
-      <div className="relative z-10 h-full flex items-end pb-28 sm:pb-32 px-4 sm:px-12 max-w-screen-2xl mx-auto">
+      <div className="relative z-10 h-full flex items-end pb-20 sm:pb-32 px-6 sm:px-12 max-w-screen-2xl mx-auto">
         <AnimatePresence mode="wait">
           <SlideContent key={current.id} movie={current} />
         </AnimatePresence>
@@ -101,18 +132,16 @@ export function HeroBanner({ movies, interval = 7000 }: Props) {
                 className="absolute inset-y-0 left-0 gradient-primary"
               />
             )}
-            {i === index && paused && (
-              <span className="absolute inset-0 gradient-primary" />
-            )}
+            {i === index && paused && <span className="absolute inset-0 gradient-primary" />}
           </button>
         ))}
       </div>
-    </section>
+    </motion.section>
   );
 }
 
-function SlideContent({ movie }: { movie: Movie }) {
-  const { data: cert } = useCertification(movie.id);
+function SlideContent({ movie }: { movie: any }) {
+  const { data: cert } = useCertification(movie.id, movie.type);
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -126,7 +155,7 @@ function SlideContent({ movie }: { movie: Movie }) {
         Em destaque
       </div>
 
-      <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tight leading-[0.95] text-shadow-cinema">
+      <h1 className="text-3xl sm:text-6xl lg:text-8xl font-black tracking-tight leading-[1.1] sm:leading-[0.95] text-shadow-cinema">
         {movie.title}
       </h1>
 
@@ -135,8 +164,8 @@ function SlideContent({ movie }: { movie: Movie }) {
           <Star className="w-4 h-4 fill-accent text-accent" />
           {movie.rating.toFixed(1)}
         </span>
-        <span className="text-muted-foreground">{movie.year}</span>
-        <span className="text-muted-foreground">{movie.duration}</span>
+        {movie.year && <span className="text-muted-foreground">{movie.year}</span>}
+        {movie.duration && <span className="text-muted-foreground">{movie.duration}</span>}
         {cert && <AgeBadge code={cert} size="sm" />}
         <div className="flex flex-wrap gap-2">
           {movie.genres.slice(0, 3).map((g) => (
@@ -147,26 +176,26 @@ function SlideContent({ movie }: { movie: Movie }) {
         </div>
       </div>
 
-      <p className="mt-6 text-base sm:text-lg text-foreground/80 max-w-xl leading-relaxed line-clamp-3">
+      <p className="mt-4 sm:mt-6 text-sm sm:text-lg text-foreground/80 max-w-xl leading-relaxed line-clamp-3 pr-4 sm:pr-0">
         {movie.synopsis}
       </p>
 
-      <div className="flex flex-wrap gap-3 mt-8">
+      <div className="flex flex-row gap-2 sm:gap-3 mt-6 sm:mt-8 w-full sm:w-auto">
         <Link
           to="/movie/$id"
           params={{ id: movie.id }}
-          className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full gradient-primary text-primary-foreground font-semibold shadow-glow hover:scale-105 transition-transform duration-300"
+          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-7 sm:py-3.5 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white text-xs sm:text-base font-semibold shadow-glow hover:scale-[1.02] transition-all duration-300"
         >
-          <Play className="w-5 h-5 fill-current" />
+          <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
           Ver detalhes
         </Link>
         <Link
           to="/movie/$id"
           params={{ id: movie.id }}
-          className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full glass-strong font-semibold hover:bg-foreground/10 transition-colors"
+          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-7 sm:py-3.5 rounded-full bg-transparent border border-white/20 backdrop-blur-md hover:bg-white/10 text-white text-xs sm:text-base font-semibold transition-colors"
         >
-          <Info className="w-5 h-5" />
-          Mais informações
+          <Info className="w-4 h-4 sm:w-5 sm:h-5" />
+          Mais infos
         </Link>
       </div>
     </motion.div>

@@ -42,7 +42,9 @@ export function LoadingScreen() {
 }
 
 export function Skeleton({ className = "" }: { className?: string }) {
-  return <div className={`relative overflow-hidden bg-muted/40 rounded-xl ${className}`}>
-    <div className="absolute inset-0 animate-shimmer" />
-  </div>;
+  return (
+    <div className={`relative overflow-hidden bg-muted/40 rounded-xl ${className}`}>
+      <div className="absolute inset-0 animate-shimmer" />
+    </div>
+  );
 }

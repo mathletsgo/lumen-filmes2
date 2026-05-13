@@ -1,51 +1,47 @@
-import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Bot, User, Loader2 } from 'lucide-react';
-import { sendChatMessage } from '@/services/aiService';
-import { toast } from 'sonner';
-import { useServerFn } from '@tanstack/react-start';
-import { useRouterState } from '@tanstack/react-router';
-import { useMovieDetails } from '@/hooks/useTmdb';
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { MessageCircle, X, Send, Bot, User, Loader2 } from "lucide-react";
+import { sendChatMessage } from "@/services/aiService";
+import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { useRouterState } from "@tanstack/react-router";
+import { useMovieDetails } from "@/hooks/useTmdb";
 
 type Message = {
-  role: 'user' | 'assistant' | 'system';
+  role: "user" | "assistant" | "system";
   content: string;
 };
 
-const SUGGESTIONS = [
-  "Filme de ação 🔥",
-  "Série curta 👀",
-  "Algo parecido com Dark"
-];
+const SUGGESTIONS = ["Filme de ação 🔥", "Série curta 👀", "Algo parecido com Dark"];
 
 export function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   const sendChatMessageFn = useServerFn(sendChatMessage);
 
   // Determinar o contexto atual (se estamos na página de um filme)
   const matches = useRouterState({ select: (s) => s.matches });
-  const movieMatch = matches.find((m) => m.routeId === '/movie/$id');
+  const movieMatch = matches.find((m) => m.routeId === "/movie/$id");
   const movieId = (movieMatch?.params as any)?.id;
   const { data: movie } = useMovieDetails(movieId || "");
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
   const handleSend = async (text: string) => {
     if (!text.trim()) return;
 
-    const userMsg: Message = { role: 'user', content: text };
+    const userMsg: Message = { role: "user", content: text };
     const newMessages = [...messages, userMsg];
-    
+
     setMessages(newMessages);
-    setInput('');
+    setInput("");
     setIsLoading(true);
 
     try {
@@ -65,7 +61,7 @@ export function ChatBot() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend(input);
     }
@@ -116,13 +112,13 @@ export function ChatBot() {
                 messages.map((msg, index) => (
                   <div
                     key={index}
-                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                   >
                     <div
                       className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm ${
-                        msg.role === 'user'
-                          ? 'bg-primary text-primary-foreground rounded-br-sm'
-                          : 'bg-white/10 text-foreground rounded-bl-sm'
+                        msg.role === "user"
+                          ? "bg-primary text-primary-foreground rounded-br-sm"
+                          : "bg-white/10 text-foreground rounded-bl-sm"
                       }`}
                     >
                       <p className="whitespace-pre-wrap">{msg.content}</p>

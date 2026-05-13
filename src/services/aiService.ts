@@ -1,8 +1,13 @@
-import { createServerFn } from '@tanstack/react-start';
-import OpenAI from 'openai';
+import { createServerFn } from "@tanstack/react-start";
+import OpenAI from "openai";
 
-export const sendChatMessage = createServerFn({ method: 'POST' })
-  .inputValidator((data: { messages: { role: 'user' | 'assistant' | 'system', content: string }[], context?: string | null }) => data)
+export const sendChatMessage = createServerFn({ method: "POST" })
+  .inputValidator(
+    (data: {
+      messages: { role: "user" | "assistant" | "system"; content: string }[];
+      context?: string | null;
+    }) => data,
+  )
   .handler(async ({ data }) => {
     try {
       // Chave lida exclusivamente no servidor — nunca exposta ao browser
@@ -42,13 +47,10 @@ Nesse modo você deve:
 - Se possível use listas e emojis 🎬🍿🔥
 - Nunca inventar dados fora do contexto`;
 
-      const messages = [
-        { role: 'system', content: systemPrompt },
-        ...data.messages,
-      ] as any;
+      const messages = [{ role: "system", content: systemPrompt }, ...data.messages] as any;
 
       const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: "gpt-4o-mini",
         messages,
         temperature: 0.7,
         max_tokens: 500,
@@ -67,7 +69,7 @@ Nesse modo você deve:
     }
   });
 
-export const analyzeSearchQuery = createServerFn({ method: 'POST' })
+export const analyzeSearchQuery = createServerFn({ method: "POST" })
   .inputValidator((data: { query: string }) => data)
   .handler(async ({ data }) => {
     try {
@@ -91,14 +93,14 @@ Se a busca já estiver perfeita ou se você não conseguir deduzir qual filme é
 Lembre-se: Responda APENAS com o JSON válido, sem markdown (\`\`\`json) ou texto adicional.`;
 
       const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: "gpt-4o-mini",
         messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Busca do usuário: "${data.query}"` }
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Busca do usuário: "${data.query}"` },
         ],
         temperature: 0.2,
         max_tokens: 100,
-        response_format: { type: "json_object" }
+        response_format: { type: "json_object" },
       });
 
       const responseText = completion.choices[0].message.content || "{}";
@@ -107,7 +109,7 @@ Lembre-se: Responda APENAS com o JSON válido, sem markdown (\`\`\`json) ou text
       return {
         success: true,
         correctedQuery: result.correctedQuery,
-        isCorrection: result.isCorrection
+        isCorrection: result.isCorrection,
       };
     } catch (error) {
       console.error("AI Search Error:", error);

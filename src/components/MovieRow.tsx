@@ -53,7 +53,12 @@ export function MovieRow({ title, movies, size = "md" }: Props) {
         className="flex gap-4 overflow-x-auto scrollbar-hidden scroll-smooth px-4 sm:px-8 pb-2"
       >
         {movies.map((m, i) => (
-          <MovieCard key={m.id} movie={m} size={size} index={i} />
+          <div 
+            key={m.id} 
+            className="shrink-0 w-[40%] sm:w-[calc(33.333%-10.66px)] md:w-[calc(25%-12px)] lg:w-[calc(16.666%-13.33px)] xl:w-[calc(14.28%-13.7px)]"
+          >
+            <MovieCard movie={m} size="full" index={i} />
+          </div>
         ))}
         <div className="shrink-0 w-4" />
       </div>

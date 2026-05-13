@@ -39,17 +39,26 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
 
   const isSearching = debounced.trim().length > 1;
   const isAiActive = !!aiCorrection;
-  
+
   // Se a IA corrigiu, usamos os resultados da IA, senão usamos a busca normal
   const activeSearch = isAiActive ? aiSearch : search;
-  const results = isSearching ? activeSearch.data ?? [] : (trending.data ?? []).slice(0, 6);
-  const isLoading = isSearching ? (search.isFetching || isAiLoading || aiSearch.isFetching) : trending.isLoading;
+  const results = isSearching ? (activeSearch.data ?? []) : (trending.data ?? []).slice(0, 6);
+  const isLoading = isSearching
+    ? search.isFetching || isAiLoading || aiSearch.isFetching
+    : trending.isLoading;
 
   // Disparar IA se a busca normal não achar nada
   useEffect(() => {
-    if (isSearching && search.isSuccess && search.data && search.data.length === 0 && !isAiLoading && !aiCorrection) {
+    if (
+      isSearching &&
+      search.isSuccess &&
+      search.data &&
+      search.data.length === 0 &&
+      !isAiLoading &&
+      !aiCorrection
+    ) {
       setIsAiLoading(true);
-      analyzeFn({ data: { query: debounced } }).then(res => {
+      analyzeFn({ data: { query: debounced } }).then((res) => {
         if (res.success && res.isCorrection && res.correctedQuery) {
           setAiCorrection(res.correctedQuery);
         }
@@ -83,7 +92,10 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                 className="flex-1 bg-transparent outline-none text-lg placeholder:text-muted-foreground"
               />
               {isLoading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
-              <button onClick={onClose} className="w-9 h-9 grid place-items-center rounded-full hover:bg-foreground/10">
+              <button
+                onClick={onClose}
+                className="w-9 h-9 grid place-items-center rounded-full hover:bg-foreground/10"
+              >
                 <X className="w-4 h-4" />
               </button>
             </motion.div>
@@ -102,7 +114,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                 "Em alta agora"
               )}
             </p>
-            
+
             {isAiActive && (
               <p className="mt-1 text-xs text-muted-foreground">
                 Busca original: <span className="line-through opacity-70">"{debounced}"</span>
@@ -115,8 +127,18 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                     <div key={i} className="aspect-[2/3] rounded-xl bg-muted/40 animate-pulse" />
                   ))
                 : results.map((m, i) => (
-                    <motion.div key={m.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
-                      <Link to="/movie/$id" params={{ id: m.id }} onClick={onClose} className="group block">
+                    <motion.div
+                      key={m.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.04 }}
+                    >
+                      <Link
+                        to="/movie/$id"
+                        params={{ id: m.id }}
+                        onClick={onClose}
+                        className="group block"
+                      >
                         <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-card relative">
                           <img
                             src={m.poster}

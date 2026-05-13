@@ -1,4 +1,10 @@
-import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
+import {
+  Outlet,
+  Link,
+  createRootRouteWithContext,
+  HeadContent,
+  Scripts,
+} from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -14,9 +20,13 @@ interface RouterContext {
 function NotFoundComponent() {
   return (
     <div className="min-h-screen grid place-items-center px-4 relative overflow-hidden">
-      <div className="absolute inset-0 -z-10" style={{
-        background: "radial-gradient(circle at 50% 30%, oklch(0.7 0.27 340 / 0.25), transparent 60%)",
-      }} />
+      <div
+        className="absolute inset-0 -z-10"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 30%, oklch(0.7 0.27 340 / 0.25), transparent 60%)",
+        }}
+      />
       <div className="text-center max-w-lg">
         <h1 className="text-[10rem] sm:text-[14rem] leading-none font-black gradient-text">404</h1>
         <h2 className="mt-2 text-2xl font-bold">Cena não encontrada</h2>
@@ -40,16 +50,36 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Lumen" },
-      { name: "description", content: "Lumen: catálogo cinematográfico com curadoria, filmes em alta e downloads via torrent." },
-      { name: "theme-color", content: "#1a0f2e" },
+      {
+        name: "description",
+        content:
+          "Lumen: catálogo cinematográfico com curadoria, filmes em alta e downloads via torrent.",
+      },
+      { name: "theme-color", content: "#000000" },
       { property: "og:title", content: "Lumen" },
-      { property: "og:description", content: "Lumen: catálogo cinematográfico com curadoria, filmes em alta e downloads via torrent." },
+      {
+        property: "og:description",
+        content:
+          "Lumen: catálogo cinematográfico com curadoria, filmes em alta e downloads via torrent.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Lumen" },
-      { name: "twitter:description", content: "Lumen: catálogo cinematográfico com curadoria, filmes em alta e downloads via torrent." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b77a18d6-716a-4011-99a5-39ea3130fa44/id-preview-0adfdf61--194156bb-c4ed-4075-8432-3febc7383991.lovable.app-1778020427841.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b77a18d6-716a-4011-99a5-39ea3130fa44/id-preview-0adfdf61--194156bb-c4ed-4075-8432-3febc7383991.lovable.app-1778020427841.png" },
+      {
+        name: "twitter:description",
+        content:
+          "Lumen: catálogo cinematográfico com curadoria, filmes em alta e downloads via torrent.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b77a18d6-716a-4011-99a5-39ea3130fa44/id-preview-0adfdf61--194156bb-c4ed-4075-8432-3febc7383991.lovable.app-1778020427841.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b77a18d6-716a-4011-99a5-39ea3130fa44/id-preview-0adfdf61--194156bb-c4ed-4075-8432-3febc7383991.lovable.app-1778020427841.png",
+      },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),

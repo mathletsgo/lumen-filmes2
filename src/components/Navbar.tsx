@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Search, Heart, User, Menu, X, Film } from "lucide-react";
+import { Search, Heart, Menu, X, Film } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SearchOverlay } from "./SearchOverlay";
 
@@ -8,7 +8,6 @@ const links = [
   { to: "/", label: "Início" },
   { to: "/categories", label: "Categorias" },
   { to: "/favorites", label: "Favoritos" },
-  { to: "/profile", label: "Perfil" },
 ] as const;
 
 export function Navbar() {
@@ -89,13 +88,6 @@ export function Navbar() {
                 aria-label="Favoritos"
               >
                 <Heart className="w-5 h-5" />
-              </Link>
-              <Link
-                to="/profile"
-                className="hidden sm:grid w-10 h-10 place-items-center rounded-full gradient-primary shadow-glow hover:scale-110 transition-transform"
-                aria-label="Perfil"
-              >
-                <User className="w-4 h-4 text-primary-foreground" />
               </Link>
               <button
                 onClick={() => setOpen((v) => !v)}

@@ -8,17 +8,23 @@ import type {
   TmdbMovie,
   TmdbPaginated,
   TmdbVideo,
+  WatchProviders,
 } from "./types";
 import { mapTmdbMovie } from "./mappers";
 import { getCertification } from "./certifications";
 
 let _genreCache: Record<number, string> | null = null;
+let _genreCachePromise: Promise<Record<number, string>> | null = null;
 
 export async function getGenreMap(): Promise<Record<number, string>> {
   if (_genreCache) return _genreCache;
-  const data = await tmdbFetch<{ genres: TmdbGenre[] }>("/genre/movie/list");
-  _genreCache = Object.fromEntries(data.genres.map((g) => [g.id, g.name]));
-  return _genreCache;
+  if (_genreCachePromise) return _genreCachePromise;
+  _genreCachePromise = tmdbFetch<{ genres: TmdbGenre[] }>("/genre/movie/list").then((data) => {
+    _genreCache = Object.fromEntries(data.genres.map((g) => [g.id, g.name]));
+    _genreCachePromise = null;
+    return _genreCache;
+  });
+  return _genreCachePromise;
 }
 
 export async function getGenres(): Promise<TmdbGenre[]> {
@@ -53,6 +59,16 @@ export async function getUpcoming(page = 1): Promise<Movie[]> {
 
 export async function getTopRated(page = 1): Promise<Movie[]> {
   const data = await tmdbFetch<TmdbPaginated<TmdbMovie>>("/movie/top_rated", { page });
+  return listToMovies(data.results);
+}
+
+export async function getUnreleased(page = 1): Promise<Movie[]> {
+  const today = new Date().toISOString().slice(0, 10);
+  const data = await tmdbFetch<TmdbPaginated<TmdbMovie>>("/discover/movie", {
+    "primary_release_date.gte": today,
+    sort_by: "popularity.desc",
+    page,
+  });
   return listToMovies(data.results);
 }
 
@@ -94,4 +110,19 @@ export async function getSimilar(id: string | number): Promise<Movie[]> {
 export async function getCollection(id: string | number): Promise<Movie[]> {
   const data = await tmdbFetch<import("./types").TmdbCollection>(`/collection/${id}`);
   return listToMovies(data.parts);
+}
+
+export async function getWatchProviders(
+  id: string | number,
+  mediaType: "movie" | "tv" = "movie",
+): Promise<WatchProviders | null> {
+  try {
+    const data = await tmdbFetch<{
+      id: number;
+      results: Record<string, WatchProviders>;
+    }>(`/${mediaType}/${id}/watch/providers`);
+    return data.results?.BR ?? null;
+  } catch {
+    return null;
+  }
 }

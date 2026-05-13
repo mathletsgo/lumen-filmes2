@@ -8,15 +8,30 @@ import {
   getSimilar,
   getTopRated,
   getTrending,
+  getUnreleased,
   getUpcoming,
   searchMovies,
   getCollection,
 } from "@/services/api/tmdb";
+import {
+  getPopularTV,
+  getTrendingTV,
+  getTVDetails,
+  getTVSeason,
+  getSimilarTV,
+  getTVGenres,
+  getTVByGenre,
+  getTVAnime,
+} from "@/services/api/tvdb";
 
 const STALE = 1000 * 60 * 10; // 10 minutes
 
 export const useTrending = () =>
-  useQuery({ queryKey: ["tmdb", "trending"], queryFn: () => getTrending("week"), staleTime: STALE });
+  useQuery({
+    queryKey: ["tmdb", "trending"],
+    queryFn: () => getTrending("week"),
+    staleTime: STALE,
+  });
 
 export const usePopular = () =>
   useQuery({ queryKey: ["tmdb", "popular"], queryFn: () => getPopular(), staleTime: STALE });
@@ -26,6 +41,9 @@ export const useNowPlaying = () =>
 
 export const useUpcoming = () =>
   useQuery({ queryKey: ["tmdb", "upcoming"], queryFn: () => getUpcoming(), staleTime: STALE });
+
+export const useUnreleased = () =>
+  useQuery({ queryKey: ["tmdb", "unreleased"], queryFn: () => getUnreleased(), staleTime: STALE });
 
 export const useTopRated = () =>
   useQuery({ queryKey: ["tmdb", "top_rated"], queryFn: () => getTopRated(), staleTime: STALE });
@@ -72,5 +90,63 @@ export const useSearch = (query: string) =>
     queryFn: () => searchMovies(query),
     enabled: query.trim().length > 1,
     staleTime: 1000 * 60 * 2,
+    placeholderData: keepPreviousData,
+  });
+
+export const useTrendingTV = () =>
+  useQuery({
+    queryKey: ["tmdb", "trending_tv"],
+    queryFn: () => getTrendingTV("week"),
+    staleTime: STALE,
+  });
+
+export const usePopularTV = () =>
+  useQuery({ queryKey: ["tmdb", "popular_tv"], queryFn: () => getPopularTV(), staleTime: STALE });
+
+export const useTVDetails = (id: string) =>
+  useQuery({
+    queryKey: ["tmdb", "tv", id],
+    queryFn: () => getTVDetails(id),
+    staleTime: STALE,
+    enabled: !!id,
+  });
+
+export const useTVSeason = (id: string, season: number) =>
+  useQuery({
+    queryKey: ["tmdb", "tv", id, "season", season],
+    queryFn: () => getTVSeason(id, season),
+    staleTime: STALE,
+    enabled: !!id && season > 0,
+  });
+
+export const useSimilarTV = (id: string) =>
+  useQuery({
+    queryKey: ["tmdb", "similar_tv", id],
+    queryFn: () => getSimilarTV(id),
+    staleTime: STALE,
+    enabled: !!id,
+  });
+
+export const useTVGenres = () =>
+  useQuery({
+    queryKey: ["tmdb", "tv_genres"],
+    queryFn: () => getTVGenres(),
+    staleTime: 1000 * 60 * 60,
+  });
+
+export const useTVByGenre = (genreId: number | null) =>
+  useQuery({
+    queryKey: ["tmdb", "tv_by_genre", genreId],
+    queryFn: () => getTVByGenre(genreId as number),
+    enabled: genreId !== null,
+    staleTime: STALE,
+    placeholderData: keepPreviousData,
+  });
+
+export const useTVAnime = (extraGenreId?: number | null) =>
+  useQuery({
+    queryKey: ["tmdb", "tv_anime", extraGenreId],
+    queryFn: () => getTVAnime(extraGenreId ?? undefined),
+    staleTime: STALE,
     placeholderData: keepPreviousData,
   });
