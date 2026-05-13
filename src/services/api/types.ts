@@ -78,8 +78,8 @@ export interface Movie {
   poster: string;
   backdrop: string;
   year: number;
-  releaseDate: string;
-  duration: string;
+  releaseDate?: string;
+  duration?: string;
   rating: number;
   genres: string[];
   synopsis: string;
@@ -87,8 +87,8 @@ export interface Movie {
   certification?: string | null;
   collectionId?: number;
   collectionName?: string;
-  cast: { name: string; role: string; photo?: string }[];
-  downloads: {
+  cast: { id: number; name: string; role: string; photo?: string }[];
+  downloads?: {
     quality: "720p" | "1080p" | "4K";
     size: string;
     language: string;
@@ -120,4 +120,81 @@ export interface WatchProviders {
   rent?: WatchProviderItem[];
   buy?: WatchProviderItem[];
   cinema?: WatchProviderItem[];
+}
+
+export interface TmdbTVShow {
+  id: number;
+  name: string;
+  original_name?: string;
+  overview: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  first_air_date: string;
+  vote_average: number;
+  vote_count: number;
+  genre_ids?: number[];
+  genres?: { id: number; name: string }[];
+  number_of_seasons?: number;
+  number_of_episodes?: number;
+  status?: string;
+  seasons?: TmdbSeasonSummary[];
+}
+
+export interface TmdbSeasonSummary {
+  id: number;
+  name: string;
+  overview: string;
+  poster_path: string | null;
+  season_number: number;
+  episode_count: number;
+  air_date: string;
+}
+
+export interface TmdbSeason extends TmdbSeasonSummary {
+  _id: string;
+  episodes: TmdbEpisode[];
+}
+
+export interface TmdbEpisode {
+  id: number;
+  name: string;
+  overview: string;
+  still_path: string | null;
+  air_date: string;
+  episode_number: number;
+  season_number: number;
+  vote_average: number;
+  runtime?: number;
+}
+
+export interface TVShow extends Omit<Movie, "type" | "duration"> {
+  type: "tv";
+  totalSeasons: number;
+  totalEpisodes: number;
+  status: string;
+  seasons: TmdbSeasonSummary[];
+}
+
+export type MediaItem = Movie | TVShow;
+
+export interface TmdbPerson {
+  id: number;
+  name: string;
+  profile_path: string | null;
+  known_for_department: string;
+  popularity: number;
+  biography?: string;
+  birthday?: string;
+  place_of_birth?: string;
+}
+
+export interface Person {
+  id: number;
+  name: string;
+  photo: string | null;
+  biography: string;
+  birthday?: string;
+  place_of_birth?: string;
+  knownFor: string;
+  movies: Movie[];
 }

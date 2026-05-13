@@ -1,12 +1,12 @@
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
-import type { Movie } from "@/data/movies";
+import type { MediaItem } from "@/services/api/types";
 import { MovieCard } from "./MovieCard";
 
 interface Props {
   title: string;
-  movies: Movie[];
+  movies: MediaItem[];
   size?: "sm" | "md" | "lg";
 }
 

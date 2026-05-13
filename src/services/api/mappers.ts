@@ -1,5 +1,23 @@
-import type { Movie, TmdbCredits, TmdbMovie, TmdbVideo } from "./types";
+import type { Movie, Person, TmdbCredits, TmdbMovie, TmdbPerson, TmdbVideo } from "./types";
 import { backdropUrl, posterUrl } from "./images";
+
+// ... (existing mockDownloads and formatDuration)
+
+export function mapTmdbPerson(
+  p: TmdbPerson,
+  movieCredits?: { cast: TmdbMovie[] },
+): Person {
+  return {
+    id: p.id,
+    name: p.name,
+    photo: p.profile_path ? posterUrl(p.profile_path) : null,
+    biography: p.biography || "Biografia não disponível.",
+    birthday: p.birthday,
+    place_of_birth: p.place_of_birth,
+    knownFor: p.known_for_department || "Atuação",
+    movies: movieCredits?.cast.slice(0, 10).map((m) => mapTmdbMovie(m)) ?? [],
+  };
+}
 
 const mockDownloads = (id: number): Movie["downloads"] => {
   const seed = Number(id) % 900;

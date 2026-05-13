@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WallpaperRouteImport } from './routes/wallpaper'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as IndexRouteImport } from './routes/index'
@@ -16,6 +17,11 @@ import { Route as TvIdRouteImport } from './routes/tv.$id'
 import { Route as PersonIdRouteImport } from './routes/person.$id'
 import { Route as MovieIdRouteImport } from './routes/movie.$id'
 
+const WallpaperRoute = WallpaperRouteImport.update({
+  id: '/wallpaper',
+  path: '/wallpaper',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FavoritesRoute = FavoritesRouteImport.update({
   id: '/favorites',
   path: '/favorites',
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/favorites': typeof FavoritesRoute
+  '/wallpaper': typeof WallpaperRoute
   '/movie/$id': typeof MovieIdRoute
   '/person/$id': typeof PersonIdRoute
   '/tv/$id': typeof TvIdRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/favorites': typeof FavoritesRoute
+  '/wallpaper': typeof WallpaperRoute
   '/movie/$id': typeof MovieIdRoute
   '/person/$id': typeof PersonIdRoute
   '/tv/$id': typeof TvIdRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/favorites': typeof FavoritesRoute
+  '/wallpaper': typeof WallpaperRoute
   '/movie/$id': typeof MovieIdRoute
   '/person/$id': typeof PersonIdRoute
   '/tv/$id': typeof TvIdRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/favorites'
+    | '/wallpaper'
     | '/movie/$id'
     | '/person/$id'
     | '/tv/$id'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/favorites'
+    | '/wallpaper'
     | '/movie/$id'
     | '/person/$id'
     | '/tv/$id'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/favorites'
+    | '/wallpaper'
     | '/movie/$id'
     | '/person/$id'
     | '/tv/$id'
@@ -103,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CategoriesRoute: typeof CategoriesRoute
   FavoritesRoute: typeof FavoritesRoute
+  WallpaperRoute: typeof WallpaperRoute
   MovieIdRoute: typeof MovieIdRoute
   PersonIdRoute: typeof PersonIdRoute
   TvIdRoute: typeof TvIdRoute
@@ -110,6 +123,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wallpaper': {
+      id: '/wallpaper'
+      path: '/wallpaper'
+      fullPath: '/wallpaper'
+      preLoaderRoute: typeof WallpaperRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/favorites': {
       id: '/favorites'
       path: '/favorites'
@@ -159,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CategoriesRoute: CategoriesRoute,
   FavoritesRoute: FavoritesRoute,
+  WallpaperRoute: WallpaperRoute,
   MovieIdRoute: MovieIdRoute,
   PersonIdRoute: PersonIdRoute,
   TvIdRoute: TvIdRoute,

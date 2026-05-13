@@ -7,6 +7,7 @@ import { SearchOverlay } from "./SearchOverlay";
 const links = [
   { to: "/", label: "Início" },
   { to: "/categories", label: "Categorias" },
+  { to: "/wallpaper", label: "Wallpaper" },
   { to: "/favorites", label: "Favoritos" },
 ] as const;
 
@@ -14,7 +15,9 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [visible, setVisible] = useState(true);
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const isWallpaper = path === "/wallpaper";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -23,13 +26,40 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Auto-hide navbar on wallpaper route
+  useEffect(() => {
+    if (!isWallpaper) {
+      setVisible(true);
+      return;
+    }
+
+    let timeout: NodeJS.Timeout;
+    const handleActivity = () => {
+      setVisible(true);
+      clearTimeout(timeout);
+      timeout = setTimeout(() => setVisible(false), 3000);
+    };
+
+    handleActivity();
+    window.addEventListener("mousemove", handleActivity);
+    window.addEventListener("touchstart", handleActivity);
+    window.addEventListener("keydown", handleActivity);
+
+    return () => {
+      window.removeEventListener("mousemove", handleActivity);
+      window.removeEventListener("touchstart", handleActivity);
+      window.removeEventListener("keydown", handleActivity);
+      clearTimeout(timeout);
+    };
+  }, [isWallpaper]);
+
   useEffect(() => setOpen(false), [path]);
 
   return (
     <>
       <motion.header
         initial={{ y: -40, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
+        animate={{ y: visible ? 0 : -100, opacity: visible ? 1 : 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
           scrolled ? "py-2" : "py-4"

@@ -25,13 +25,7 @@ export function MovieCard({ movie, size = "md", index = 0 }: Props) {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay: Math.min(index * 0.05, 0.3) }}
-      className={`group relative shrink-0 ${widths[size]}`}
-    >
+    <div className={`group relative shrink-0 ${widths[size]}`}>
       <Link
         to={isTV ? "/tv/$id" : "/movie/$id"}
         params={{ id: movie.id }}
@@ -43,7 +37,7 @@ export function MovieCard({ movie, size = "md", index = 0 }: Props) {
           loading="lazy"
           width={512}
           height={768}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent opacity-90" />
         <div className="absolute top-3 left-3 z-10">
@@ -87,6 +81,6 @@ export function MovieCard({ movie, size = "md", index = 0 }: Props) {
           </div>
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 }

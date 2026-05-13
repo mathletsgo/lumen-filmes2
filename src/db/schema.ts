@@ -12,6 +12,7 @@ export const movieReviews = sqliteTable("movie_reviews", {
   movieId: text("movie_id").notNull(),
   rating: integer("rating").notNull(), // 1 a 5
   comment: text("comment"),
+  authorName: text("author_name").notNull().default("Anônimo"),
   createdAt: text("created_at")
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),

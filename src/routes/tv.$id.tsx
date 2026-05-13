@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { ArrowLeft, Star, Heart, Share2, Play, Clock, Calendar } from "lucide-react";
+import { ArrowLeft, Star, Heart, Share2, Play, Clock, Calendar, Check } from "lucide-react";
 import { useFavorites } from "@/lib/favorites";
 import { MovieRow } from "@/components/MovieRow";
 import { MovieRowSkeleton } from "@/components/Skeletons";
@@ -181,11 +181,10 @@ function TVPage() {
               )}
               <button
                 onClick={() => toggle(id)}
-                className={`inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold transition-all ${
-                  fav
+                className={`inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold transition-all ${fav
                     ? "bg-primary/20 text-primary border border-primary/40"
                     : "glass-strong hover:bg-foreground/10"
-                }`}
+                  }`}
               >
                 <Heart className={`w-5 h-5 ${fav ? "fill-current" : ""}`} />
                 {fav ? "Favoritado" : "Favoritar"}
@@ -194,9 +193,9 @@ function TVPage() {
                 onClick={() => {
                   setShared(true);
                   setTimeout(() => setShared(false), 2000);
-                  navigator.clipboard.writeText(window.location.href).catch(() => {});
+                  navigator.clipboard.writeText(window.location.href).catch(() => { });
                   if (navigator.share) {
-                    navigator.share({ title: tv.title, url: window.location.href }).catch(() => {});
+                    navigator.share({ title: tv.title, url: window.location.href }).catch(() => { });
                   }
                 }}
                 className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full glass-strong font-semibold hover:bg-foreground/10 transition-colors"

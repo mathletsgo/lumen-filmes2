@@ -11,8 +11,56 @@ import {
   getUnreleased,
   getUpcoming,
   searchMovies,
+  searchMulti,
   getCollection,
+  getPopularPeople,
+  getPersonDetails,
+  getPeopleByIds,
 } from "@/services/api/tmdb";
+
+const TOP_ACTOR_IDS = [
+  500, // Tom Cruise
+  6193, // Leonardo DiCaprio
+  287, // Brad Pitt
+  50571, // Zendaya
+  1190668, // Timothée Chalamet
+  72129, // Jennifer Lawrence
+  234352, // Margot Robbie
+  18918, // Dwayne Johnson
+  1245, // Scarlett Johansson
+  2888, // Will Smith
+  1136406, // Tom Holland
+  3223, // Robert Downey Jr.
+  1373737, // Florence Pugh
+  16828, // Chris Evans
+  74568, // Chris Hemsworth
+];
+
+// ... (existing hooks)
+
+export const useTopActors = () =>
+  useQuery({
+    queryKey: ["tmdb", "people", "top"],
+    queryFn: () => getPeopleByIds(TOP_ACTOR_IDS),
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours
+  });
+
+// ... (existing hooks)
+
+export const usePopularPeople = () =>
+  useQuery({
+    queryKey: ["tmdb", "people", "popular"],
+    queryFn: () => getPopularPeople(),
+    staleTime: STALE,
+  });
+
+export const usePersonDetails = (id: number | string) =>
+  useQuery({
+    queryKey: ["tmdb", "person", id],
+    queryFn: () => getPersonDetails(id),
+    enabled: !!id,
+    staleTime: STALE,
+  });
 import {
   getPopularTV,
   getTrendingTV,
@@ -87,7 +135,7 @@ export const useCollection = (id?: number | null) =>
 export const useSearch = (query: string) =>
   useQuery({
     queryKey: ["tmdb", "search", query],
-    queryFn: () => searchMovies(query),
+    queryFn: () => searchMulti(query),
     enabled: query.trim().length > 1,
     staleTime: 1000 * 60 * 2,
     placeholderData: keepPreviousData,

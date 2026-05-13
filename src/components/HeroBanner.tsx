@@ -1,14 +1,14 @@
 import { motion, AnimatePresence, type PanInfo } from "framer-motion";
 import { Link } from "@tanstack/react-router";
-import { Play, Info, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Play, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
-import type { Movie } from "@/data/movies";
+import type { MediaItem } from "@/services/api/types";
 import { AgeBadge } from "@/components/AgeBadge";
 import { useCertification } from "@/hooks/useCertification";
 import { getAverageColor, updateThemeColor } from "@/lib/colorUtils";
 
 interface Props {
-  movies: Movie[];
+  movies: MediaItem[];
   interval?: number;
 }
 
@@ -83,8 +83,8 @@ export function HeroBanner({ movies, interval = 7000 }: Props) {
       </AnimatePresence>
 
       {/* Overlays */}
-      <div 
-        className="absolute inset-0" 
+      <div
+        className="absolute inset-0"
         style={{ background: "linear-gradient(to right, hsl(var(--background)) 20%, transparent 100%)" }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
@@ -113,29 +113,6 @@ export function HeroBanner({ movies, interval = 7000 }: Props) {
         <ChevronRight className="w-6 h-6" />
       </button>
 
-      {/* Dots + progress */}
-      <div className="absolute bottom-6 sm:bottom-10 left-0 right-0 z-20 flex items-center justify-center gap-3 px-4">
-        {slides.map((s, i) => (
-          <button
-            key={s.id}
-            onClick={() => setIndex(i)}
-            aria-label={`Ir para slide ${i + 1}`}
-            className="group relative h-1.5 rounded-full overflow-hidden bg-foreground/20 hover:bg-foreground/30 transition-all"
-            style={{ width: i === index ? 56 : 24 }}
-          >
-            {i === index && !paused && (
-              <motion.span
-                key={`p-${i}-${index}`}
-                initial={{ width: 0 }}
-                animate={{ width: "100%" }}
-                transition={{ duration: interval / 1000, ease: "linear" }}
-                className="absolute inset-y-0 left-0 gradient-primary"
-              />
-            )}
-            {i === index && paused && <span className="absolute inset-0 gradient-primary" />}
-          </button>
-        ))}
-      </div>
     </motion.section>
   );
 }
@@ -155,7 +132,7 @@ function SlideContent({ movie }: { movie: any }) {
         Em destaque
       </div>
 
-      <h1 className="text-3xl sm:text-6xl lg:text-8xl font-black tracking-tight leading-[1.1] sm:leading-[0.95] text-shadow-cinema">
+      <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] sm:leading-[0.95] text-shadow-cinema">
         {movie.title}
       </h1>
 
@@ -168,7 +145,7 @@ function SlideContent({ movie }: { movie: any }) {
         {movie.duration && <span className="text-muted-foreground">{movie.duration}</span>}
         {cert && <AgeBadge code={cert} size="sm" />}
         <div className="flex flex-wrap gap-2">
-          {movie.genres.slice(0, 3).map((g) => (
+          {movie.genres.slice(0, 3).map((g: string) => (
             <span key={g} className="px-2.5 py-0.5 rounded-full glass text-xs">
               {g}
             </span>
@@ -184,19 +161,12 @@ function SlideContent({ movie }: { movie: any }) {
         <Link
           to="/movie/$id"
           params={{ id: movie.id }}
-          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-7 sm:py-3.5 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white text-xs sm:text-base font-semibold shadow-glow hover:scale-[1.02] transition-all duration-300"
+          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-7 sm:py-3.5 rounded-full bg-transparent border border-white/20 backdrop-blur-md hover:bg-white/10 text-white text-xs sm:text-base font-semibold transition-all duration-300"
         >
           <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
-          Ver detalhes
+          Assistir agora
         </Link>
-        <Link
-          to="/movie/$id"
-          params={{ id: movie.id }}
-          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-7 sm:py-3.5 rounded-full bg-transparent border border-white/20 backdrop-blur-md hover:bg-white/10 text-white text-xs sm:text-base font-semibold transition-colors"
-        >
-          <Info className="w-4 h-4 sm:w-5 sm:h-5" />
-          Mais infos
-        </Link>
+
       </div>
     </motion.div>
   );

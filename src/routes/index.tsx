@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { HeroBanner } from "@/components/HeroBanner";
 import { MovieRow } from "@/components/MovieRow";
 import { HeroSkeleton, MovieRowSkeleton } from "@/components/Skeletons";
+import { ActorRow } from "@/components/ActorRow";
 import {
   useNowPlaying,
   usePopular,
@@ -11,6 +12,7 @@ import {
   useUpcoming,
   useTrendingTV,
   usePopularTV,
+  useTopActors,
 } from "@/hooks/useTmdb";
 import type { MediaItem, Movie, TVShow } from "@/services/api/types";
 
@@ -47,15 +49,31 @@ function Index() {
   const upcoming = useUpcoming();
   const unreleased = useUnreleased();
   const topRated = useTopRated();
+  const topActors = useTopActors();
   const trendingTV = useTrendingTV();
   const popularTV = usePopularTV();
 
   const popularMovies = popular.data ?? [];
   const nowPlayingMovies = nowPlaying.data ?? [];
-  const featuredPool = popularMovies.length > 0 ? popularMovies : nowPlayingMovies;
+  const trendingMovies = trending.data ?? [];
+  const popularTVItems = popularTV.data ?? [];
+  const trendingTVItems = trendingTV.data ?? [];
+
+  const featuredPool = [
+    ...popularMovies,
+    ...nowPlayingMovies,
+    ...trendingMovies,
+    ...popularTVItems,
+    ...trendingTVItems,
+  ];
+
+  const ratedMovies = featuredPool.filter((item) => item.rating >= 6);
 
   const featured: MediaItem[] = toMediaItems(
-    shuffleArray(featuredPool).slice(0, 8)
+    shuffleArray(ratedMovies.length >= 4 ? ratedMovies : featuredPool).slice(
+      0,
+      12
+    )
   );
 
   return (
@@ -68,9 +86,9 @@ function Index() {
 
       <div className="-mt-24 relative z-20 space-y-2">
         {trending.isLoading ? (
-          <MovieRowSkeleton title="Em alta agora" />
+          <MovieRowSkeleton title="Filmes em alta" />
         ) : (
-          <MovieRow title="Em alta agora" movies={toMediaItems(trending.data ?? [])} />
+          <MovieRow title="Filmes em alta" movies={toMediaItems(trending.data ?? [])} />
         )}
 
         {trendingTV.isLoading ? (
@@ -85,23 +103,8 @@ function Index() {
           <MovieRow title="Em cartaz" movies={toMediaItems(nowPlaying.data ?? [])} />
         )}
 
-        {popular.isLoading ? (
-          <MovieRowSkeleton title="Filmes populares" />
-        ) : (
-          <MovieRow title="Filmes populares" movies={toMediaItems(popular.data ?? [])} />
-        )}
 
-        {popularTV.isLoading ? (
-          <MovieRowSkeleton title="Séries populares" />
-        ) : (
-          <MovieRow title="Séries populares" movies={toMediaItems(popularTV.data ?? [])} />
-        )}
 
-        {upcoming.isLoading ? (
-          <MovieRowSkeleton title="Lançamentos em breve" />
-        ) : (
-          <MovieRow title="Lançamentos em breve" movies={toMediaItems(upcoming.data ?? [])} />
-        )}
 
         {unreleased.isLoading ? (
           <MovieRowSkeleton title="Em breve nos cinemas" />
@@ -113,6 +116,13 @@ function Index() {
           <MovieRowSkeleton title="Mais bem avaliados" />
         ) : (
           <MovieRow title="Mais bem avaliados" movies={toMediaItems(topRated.data ?? [])} />
+        )}
+
+        {topActors.data && (
+          <ActorRow 
+            title="Melhores atores" 
+            people={topActors.data} 
+          />
         )}
       </div>
     </div>

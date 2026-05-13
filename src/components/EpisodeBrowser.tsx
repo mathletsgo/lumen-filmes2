@@ -22,11 +22,10 @@ function SeasonTab({
   return (
     <button
       onClick={onClick}
-      className={`shrink-0 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 whitespace-nowrap ${
-        isActive
+      className={`shrink-0 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 whitespace-nowrap ${isActive
           ? "bg-primary text-primary-foreground shadow-glow"
           : "glass hover:bg-foreground/10 text-muted-foreground hover:text-foreground"
-      }`}
+        }`}
     >
       {season.name}
     </button>
@@ -35,21 +34,16 @@ function SeasonTab({
 
 function EpisodeCard({ episode, onClick }: { episode: TmdbEpisode; onClick: () => void }) {
   return (
-    <motion.button
+    <button
       onClick={onClick}
       className="shrink-0 w-full sm:w-56 lg:w-64 sm:snap-start group text-left"
-      initial={{ opacity: 0, y: 10 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
     >
-      <div className="relative aspect-video rounded-xl overflow-hidden bg-muted/40 mb-2.5 shadow-card group-hover:shadow-elevated transition-shadow duration-300">
+      <div className="relative aspect-video rounded-xl overflow-hidden bg-muted/40 mb-2.5 shadow-card transition-shadow duration-300">
         {episode.still_path ? (
           <img
             src={backdropUrl(episode.still_path, "w780")}
             alt={episode.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover"
             loading="lazy"
           />
         ) : (
@@ -89,7 +83,7 @@ function EpisodeCard({ episode, onClick }: { episode: TmdbEpisode; onClick: () =
           )}
         </div>
       </div>
-    </motion.button>
+    </button>
   );
 }
 
@@ -212,13 +206,11 @@ function EpisodeSheet({
 
 export function EpisodeBrowser({ tvId, seasons }: Props) {
   const activeSeasons = seasons.filter((s) => s.season_number > 0);
-  const [activeSeasonNumber, setActiveSeasonNumber] = useState(
-    activeSeasons.length > 0 ? activeSeasons[activeSeasons.length - 1].season_number : 1,
-  );
+  const [activeSeasonNumber, setActiveSeasonNumber] = useState<number | null>(null);
   const [selectedEpisode, setSelectedEpisode] = useState<TmdbEpisode | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { data: seasonData, isLoading } = useTVSeason(tvId, activeSeasonNumber);
+  const { data: seasonData, isLoading } = useTVSeason(tvId, activeSeasonNumber || 0);
 
   const scroll = (dir: "l" | "r") => {
     if (!scrollRef.current) return;
@@ -238,7 +230,7 @@ export function EpisodeBrowser({ tvId, seasons }: Props) {
             key={s.season_number}
             season={s}
             isActive={s.season_number === activeSeasonNumber}
-            onClick={() => setActiveSeasonNumber(s.season_number)}
+            onClick={() => setActiveSeasonNumber((prev) => (prev === s.season_number ? null : s.season_number))}
           />
         ))}
       </div>
@@ -249,7 +241,7 @@ export function EpisodeBrowser({ tvId, seasons }: Props) {
           className="grid grid-cols-2 sm:flex gap-3 sm:gap-4 sm:overflow-x-auto scrollbar-hidden scroll-smooth sm:snap-x snap-mandatory pb-3"
           style={{ scrollBehavior: "smooth" }}
         >
-          {isLoading ? (
+          {!activeSeasonNumber ? null : isLoading ? (
             Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="shrink-0 w-full sm:w-56 lg:w-64 space-y-2">
                 <div className="aspect-video rounded-xl bg-muted/40 animate-pulse" />

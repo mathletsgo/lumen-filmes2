@@ -67,16 +67,57 @@ export function ChatBot() {
     }
   };
 
+  // Auto-hide e transparência no Wallpaper
+  const path = useRouterState({ select: (s) => s.location.pathname });
+  const isWallpaper = path === "/wallpaper";
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    if (!isWallpaper) {
+      setIsVisible(true);
+      return;
+    }
+
+    let timeout: NodeJS.Timeout;
+    const handleActivity = () => {
+      setIsVisible(true);
+      clearTimeout(timeout);
+      timeout = setTimeout(() => setIsVisible(false), 3000);
+    };
+
+    handleActivity();
+    window.addEventListener("mousemove", handleActivity);
+    window.addEventListener("touchstart", handleActivity);
+    window.addEventListener("keydown", handleActivity);
+
+    return () => {
+      window.removeEventListener("mousemove", handleActivity);
+      window.removeEventListener("touchstart", handleActivity);
+      window.removeEventListener("keydown", handleActivity);
+      clearTimeout(timeout);
+    };
+  }, [isWallpaper]);
+
   return (
     <>
       {/* Floating Button */}
       <motion.button
-        className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-primary text-primary-foreground shadow-glow hover:scale-105 transition-transform"
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ 
+          opacity: isVisible ? (isWallpaper ? 0.6 : 1) : 0, 
+          scale: isVisible ? 1 : 0.5,
+          y: isVisible ? 0 : 20
+        }}
+        className="fixed bottom-6 right-6 z-50 p-4 rounded-full transition-all duration-500 shadow-glow bg-white/5 backdrop-blur-md border border-white/10 text-white hover:bg-white/20 hover:border-primary/50 group"
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
-        {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
+        {isOpen ? (
+          <X size={24} className="group-hover:text-primary transition-colors" />
+        ) : (
+          <MessageCircle size={24} className="group-hover:text-primary transition-colors" />
+        )}
       </motion.button>
 
       {/* Chat Window */}
@@ -95,7 +136,7 @@ export function ChatBot() {
                 <Bot className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-sm">Lumen IA</h3>
+                <h3 className="font-semibold text-sm">Assistente</h3>
                 <p className="text-xs text-muted-foreground">Especialista em Filmes & Séries</p>
               </div>
             </div>

@@ -3,13 +3,38 @@
 import { tmdbFetch } from "./client";
 import type {
   Movie,
+  Person,
   TmdbCredits,
   TmdbGenre,
   TmdbMovie,
   TmdbPaginated,
+  TmdbPerson,
   TmdbVideo,
   WatchProviders,
 } from "./types";
+
+// ... (existing functions)
+
+export async function getPopularPeople(page = 1): Promise<TmdbPerson[]> {
+  const data = await tmdbFetch<TmdbPaginated<TmdbPerson>>("/person/popular", { page });
+  return data.results;
+}
+
+export async function getPersonDetails(id: number | string): Promise<Person> {
+  const [person, credits] = await Promise.all([
+    tmdbFetch<TmdbPerson>(`/person/${id}`),
+    tmdbFetch<{ cast: TmdbMovie[] }>(`/person/${id}/movie_credits`),
+  ]);
+  const { mapTmdbPerson } = await import("./mappers");
+  return mapTmdbPerson(person, credits);
+}
+
+export async function getPeopleByIds(ids: number[]): Promise<TmdbPerson[]> {
+  const people = await Promise.all(
+    ids.map((id) => tmdbFetch<TmdbPerson>(`/person/${id}`))
+  );
+  return people;
+}
 import { mapTmdbMovie } from "./mappers";
 import { getCertification } from "./certifications";
 
@@ -90,6 +115,34 @@ export async function searchMovies(query: string, page = 1): Promise<Movie[]> {
     include_adult: false,
   });
   return listToMovies(data.results);
+}
+
+export async function searchMulti(query: string, page = 1): Promise<import("./types").MediaItem[]> {
+  const term = query.trim();
+  if (!term) return [];
+  const data = await tmdbFetch<TmdbPaginated<any>>("/search/multi", {
+    query: term,
+    page,
+    include_adult: false,
+  });
+
+  const [movieGenreMap, tvGenreMap] = await Promise.all([
+    getGenreMap(),
+    import("./tvdb").then((m) => m.getTVGenreMap()),
+  ]);
+
+  const { mapTmdbTV } = await import("./tvMappers");
+
+  return data.results
+    .map((item: any) => {
+      if (item.media_type === "movie") {
+        return mapTmdbMovie(item, { genreMap: movieGenreMap });
+      } else if (item.media_type === "tv") {
+        return mapTmdbTV(item, { genreMap: tvGenreMap });
+      }
+      return null;
+    })
+    .filter(Boolean) as import("./types").MediaItem[];
 }
 
 export async function getMovieDetails(id: string | number): Promise<Movie> {

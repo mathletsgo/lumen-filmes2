@@ -1,17 +1,38 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Search, X, Star, Loader2, Sparkles } from "lucide-react";
+import { Search, X, Star, Loader2, Sparkles, Clock, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useSearch, useTrending } from "@/hooks/useTmdb";
+import { useSearch } from "@/hooks/useTmdb";
 import { useServerFn } from "@tanstack/react-start";
 import { analyzeSearchQuery } from "@/services/aiService";
+
+const HISTORY_KEY = "lumen_search_history";
 
 export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [q, setQ] = useState("");
   const [debounced, setDebounced] = useState("");
   const [aiCorrection, setAiCorrection] = useState<string | null>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [history, setHistory] = useState<string[]>([]);
   const analyzeFn = useServerFn(analyzeSearchQuery);
+
+  // Carregar histórico
+  useEffect(() => {
+    const saved = localStorage.getItem(HISTORY_KEY);
+    if (saved) setHistory(JSON.parse(saved));
+  }, []);
+
+  const saveToHistory = (query: string) => {
+    if (!query.trim() || query.length < 2) return;
+    const newHistory = [query, ...history.filter((h) => h !== query)].slice(0, 5);
+    setHistory(newHistory);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+    localStorage.removeItem(HISTORY_KEY);
+  };
 
   useEffect(() => {
     if (!open) {
@@ -33,7 +54,6 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
     return () => clearTimeout(t);
   }, [q]);
 
-  const trending = useTrending();
   const search = useSearch(debounced);
   const aiSearch = useSearch(aiCorrection || "");
 
@@ -42,10 +62,10 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
 
   // Se a IA corrigiu, usamos os resultados da IA, senão usamos a busca normal
   const activeSearch = isAiActive ? aiSearch : search;
-  const results = isSearching ? (activeSearch.data ?? []) : (trending.data ?? []).slice(0, 6);
+  const results = isSearching ? (activeSearch.data ?? []) : [];
   const isLoading = isSearching
     ? search.isFetching || isAiLoading || aiSearch.isFetching
-    : trending.isLoading;
+    : false;
 
   // Disparar IA se a busca normal não achar nada
   useEffect(() => {
@@ -88,6 +108,12 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                 autoFocus
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && q.trim().length > 1) {
+                    saveToHistory(q);
+                    setDebounced(q);
+                  }
+                }}
                 placeholder="Buscar filmes, gêneros..."
                 className="flex-1 bg-transparent outline-none text-lg placeholder:text-muted-foreground"
               />
@@ -100,20 +126,49 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
               </button>
             </motion.div>
 
-            <p className="mt-6 text-xs uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
-              {isSearching ? (
-                isAiActive ? (
-                  <span className="flex items-center gap-1.5 text-primary">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    Mostrando resultados para "{aiCorrection}"
-                  </span>
+            <p className="mt-6 text-xs uppercase tracking-[0.2em] text-muted-foreground flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                {isSearching ? (
+                  isAiActive ? (
+                    <span className="flex items-center gap-1.5 text-primary">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Mostrando resultados para "{aiCorrection}"
+                    </span>
+                  ) : (
+                    `Resultados para "${debounced}"`
+                  )
                 ) : (
-                  `Resultados para "${debounced}"`
-                )
-              ) : (
-                "Em alta agora"
+                  history.length > 0 ? "Buscas recentes" : ""
+                )}
+              </span>
+              {!isSearching && history.length > 0 && (
+                <button
+                  onClick={clearHistory}
+                  className="flex items-center gap-1 hover:text-primary transition-colors lowercase tracking-normal"
+                >
+                  <Trash2 className="w-3 h-3" /> Limpar histórico
+                </button>
               )}
             </p>
+
+            {/* Histórico */}
+            {!isSearching && history.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {history.map((h) => (
+                  <button
+                    key={h}
+                    onClick={() => {
+                      setQ(h);
+                      setDebounced(h);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full glass hover:bg-primary/20 hover:border-primary/30 transition-all text-sm group"
+                  >
+                    <Clock className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary" />
+                    {h}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {isAiActive && (
               <p className="mt-1 text-xs text-muted-foreground">
@@ -134,9 +189,12 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                       transition={{ delay: i * 0.04 }}
                     >
                       <Link
-                        to="/movie/$id"
+                        to={m.type === "tv" ? "/tv/$id" : "/movie/$id"}
                         params={{ id: m.id }}
-                        onClick={onClose}
+                        onClick={() => {
+                          saveToHistory(aiCorrection || debounced);
+                          onClose();
+                        }}
                         className="group block"
                       >
                         <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-card relative">
@@ -161,7 +219,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                 <div className="col-span-full flex flex-col items-center justify-center py-10 text-muted-foreground">
                   <Search className="w-10 h-10 mb-3 opacity-20" />
                   <p>Nenhum resultado para "{debounced}"</p>
-                  <p className="text-xs mt-1">A IA não encontrou correspondências semânticas.</p>
+                  <p className="text-xs mt-1">Nenhuma correspondência encontrada.</p>
                 </div>
               )}
             </div>

@@ -318,7 +318,7 @@ function MoviePage() {
   );
 }
 
-type Dl = Movie["downloads"][number];
+type Dl = NonNullable<Movie["downloads"]>[number];
 
 function DownloadRow({ d }: { d: Dl }) {
   const [copied, setCopied] = useState(false);
