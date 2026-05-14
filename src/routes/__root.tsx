@@ -49,14 +49,14 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lumen" },
+      { title: "Lumen." },
       {
         name: "description",
         content:
           "Lumen: catálogo cinematográfico com curadoria, filmes em alta e downloads via torrent.",
       },
       { name: "theme-color", content: "#000000" },
-      { property: "og:title", content: "Lumen" },
+      { property: "og:title", content: "Lumen." },
       {
         property: "og:description",
         content:
@@ -64,7 +64,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Lumen" },
+      { name: "twitter:title", content: "Lumen." },
       {
         name: "twitter:description",
         content:

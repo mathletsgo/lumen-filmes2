@@ -19,7 +19,7 @@ import type { MediaItem, Movie, TVShow } from "@/services/api/types";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Lumen — Catálogo Cinematográfico" },
+      { title: "Lumen." },
       {
         name: "description",
         content: "Descubra filmes em alta, lançamentos e clássicos com curadoria cinematográfica.",
