@@ -81,7 +81,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
           "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b77a18d6-716a-4011-99a5-39ea3130fa44/id-preview-0adfdf61--194156bb-c4ed-4075-8432-3febc7383991.lovable.app-1778020427841.png",
       },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "icon", href: "/favicon.ico" },
+      { rel: "stylesheet", href: appCss }
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,

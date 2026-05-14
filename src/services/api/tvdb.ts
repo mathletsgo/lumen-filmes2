@@ -31,7 +31,9 @@ export async function getTVGenres(): Promise<TmdbGenre[]> {
 
 async function listToTVShows(list: TmdbTVShow[]): Promise<TVShow[]> {
   const genreMap = await getTVGenreMap();
-  return list.map((m) => mapTmdbTV(m, { genreMap }));
+  return list
+    .filter((m) => m.vote_average > 0 && !!m.poster_path && !!m.backdrop_path && !!(m.name || m.original_name))
+    .map((m) => mapTmdbTV(m, { genreMap }));
 }
 
 export async function getTrendingTV(window: "day" | "week" = "week"): Promise<TVShow[]> {
