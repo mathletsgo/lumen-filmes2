@@ -59,8 +59,14 @@ export async function getGenres(): Promise<TmdbGenre[]> {
 
 async function listToMovies(list: TmdbMovie[]): Promise<Movie[]> {
   const genreMap = await getGenreMap();
+  const today = new Date();
   return list
-    .filter((m) => m.vote_average > 0 && !!m.poster_path && !!m.backdrop_path && !!(m.title || m.original_title))
+    .filter((m) => {
+      const hasImagesAndTitle = !!m.poster_path && !!m.backdrop_path && !!(m.title || m.original_title);
+      if (!hasImagesAndTitle) return false;
+      const isUnreleased = m.release_date ? new Date(m.release_date) > today : false;
+      return isUnreleased || m.vote_average > 0;
+    })
     .map((m) => mapTmdbMovie(m, { genreMap }));
 }
 
@@ -135,8 +141,16 @@ export async function searchMulti(query: string, page = 1): Promise<import("./ty
 
   const { mapTmdbTV } = await import("./tvMappers");
 
+  const today = new Date();
+
   return data.results
-    .filter((item: any) => item.vote_average > 0 && !!item.poster_path && !!item.backdrop_path && !!(item.title || item.original_title || item.name || item.original_name))
+    .filter((item: any) => {
+      const hasImagesAndTitle = !!item.poster_path && !!item.backdrop_path && !!(item.title || item.original_title || item.name || item.original_name);
+      if (!hasImagesAndTitle) return false;
+      const dateStr = item.release_date || item.first_air_date;
+      const isUnreleased = dateStr ? new Date(dateStr) > today : false;
+      return isUnreleased || item.vote_average > 0;
+    })
     .map((item: any) => {
       if (item.media_type === "movie") {
         return mapTmdbMovie(item, { genreMap: movieGenreMap });

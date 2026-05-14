@@ -31,8 +31,14 @@ export async function getTVGenres(): Promise<TmdbGenre[]> {
 
 async function listToTVShows(list: TmdbTVShow[]): Promise<TVShow[]> {
   const genreMap = await getTVGenreMap();
+  const today = new Date();
   return list
-    .filter((m) => m.vote_average > 0 && !!m.poster_path && !!m.backdrop_path && !!(m.name || m.original_name))
+    .filter((m) => {
+      const hasImagesAndTitle = !!m.poster_path && !!m.backdrop_path && !!(m.name || m.original_name);
+      if (!hasImagesAndTitle) return false;
+      const isUnreleased = m.first_air_date ? new Date(m.first_air_date) > today : false;
+      return isUnreleased || m.vote_average > 0;
+    })
     .map((m) => mapTmdbTV(m, { genreMap }));
 }
 
