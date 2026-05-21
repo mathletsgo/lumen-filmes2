@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WallpaperRouteImport } from './routes/wallpaper'
+import { Route as LumenLabsRouteImport } from './routes/lumen-labs'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as IndexRouteImport } from './routes/index'
@@ -20,6 +21,11 @@ import { Route as MovieIdRouteImport } from './routes/movie.$id'
 const WallpaperRoute = WallpaperRouteImport.update({
   id: '/wallpaper',
   path: '/wallpaper',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LumenLabsRoute = LumenLabsRouteImport.update({
+  id: '/lumen-labs',
+  path: '/lumen-labs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FavoritesRoute = FavoritesRouteImport.update({
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/favorites': typeof FavoritesRoute
+  '/lumen-labs': typeof LumenLabsRoute
   '/wallpaper': typeof WallpaperRoute
   '/movie/$id': typeof MovieIdRoute
   '/person/$id': typeof PersonIdRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/favorites': typeof FavoritesRoute
+  '/lumen-labs': typeof LumenLabsRoute
   '/wallpaper': typeof WallpaperRoute
   '/movie/$id': typeof MovieIdRoute
   '/person/$id': typeof PersonIdRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/favorites': typeof FavoritesRoute
+  '/lumen-labs': typeof LumenLabsRoute
   '/wallpaper': typeof WallpaperRoute
   '/movie/$id': typeof MovieIdRoute
   '/person/$id': typeof PersonIdRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/favorites'
+    | '/lumen-labs'
     | '/wallpaper'
     | '/movie/$id'
     | '/person/$id'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/favorites'
+    | '/lumen-labs'
     | '/wallpaper'
     | '/movie/$id'
     | '/person/$id'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/favorites'
+    | '/lumen-labs'
     | '/wallpaper'
     | '/movie/$id'
     | '/person/$id'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CategoriesRoute: typeof CategoriesRoute
   FavoritesRoute: typeof FavoritesRoute
+  LumenLabsRoute: typeof LumenLabsRoute
   WallpaperRoute: typeof WallpaperRoute
   MovieIdRoute: typeof MovieIdRoute
   PersonIdRoute: typeof PersonIdRoute
@@ -128,6 +141,13 @@ declare module '@tanstack/react-router' {
       path: '/wallpaper'
       fullPath: '/wallpaper'
       preLoaderRoute: typeof WallpaperRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lumen-labs': {
+      id: '/lumen-labs'
+      path: '/lumen-labs'
+      fullPath: '/lumen-labs'
+      preLoaderRoute: typeof LumenLabsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/favorites': {
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CategoriesRoute: CategoriesRoute,
   FavoritesRoute: FavoritesRoute,
+  LumenLabsRoute: LumenLabsRoute,
   WallpaperRoute: WallpaperRoute,
   MovieIdRoute: MovieIdRoute,
   PersonIdRoute: PersonIdRoute,

@@ -204,9 +204,15 @@ function EpisodeSheet({
   );
 }
 
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
+
+const route = getRouteApi("/tv/$id");
+
 export function EpisodeBrowser({ tvId, seasons }: Props) {
   const activeSeasons = seasons.filter((s) => s.season_number > 0);
-  const [activeSeasonNumber, setActiveSeasonNumber] = useState<number | null>(null);
+  const { season: activeSeasonNumber = null } = route.useSearch();
+  const navigate = useNavigate({ from: "/tv/$id" });
+  
   const [selectedEpisode, setSelectedEpisode] = useState<TmdbEpisode | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -230,7 +236,12 @@ export function EpisodeBrowser({ tvId, seasons }: Props) {
             key={s.season_number}
             season={s}
             isActive={s.season_number === activeSeasonNumber}
-            onClick={() => setActiveSeasonNumber((prev) => (prev === s.season_number ? null : s.season_number))}
+            onClick={() => 
+              navigate({ 
+                search: { season: s.season_number === activeSeasonNumber ? null : s.season_number },
+                replace: true 
+              })
+            }
           />
         ))}
       </div>

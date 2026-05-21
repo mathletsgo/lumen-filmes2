@@ -10,7 +10,16 @@ import { EpisodeBrowser } from "@/components/EpisodeBrowser";
 import { useTVDetails, useSimilarTV } from "@/hooks/useTmdb";
 import { AgeBadge } from "@/components/AgeBadge";
 
+type TVSearch = {
+  season?: number | null;
+};
+
 export const Route = createFileRoute("/tv/$id")({
+  validateSearch: (search: Record<string, unknown>): TVSearch => {
+    return {
+      season: search.season ? Number(search.season) : null,
+    };
+  },
   head: () => ({
     meta: [
       { title: "Série — Lumen" },

@@ -1,11 +1,19 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { MovieCard } from "@/components/MovieCard";
 import { MovieGridSkeleton } from "@/components/Skeletons";
 import { useByGenre, useGenres, usePopular } from "@/hooks/useTmdb";
 
+type CategoriesSearch = {
+  genre?: number | null;
+};
+
 export const Route = createFileRoute("/categories")({
+  validateSearch: (search: Record<string, unknown>): CategoriesSearch => {
+    return {
+      genre: search.genre ? Number(search.genre) : null,
+    };
+  },
   head: () => ({
     meta: [
       { title: "Categorias — Lumen" },
@@ -20,7 +28,9 @@ export const Route = createFileRoute("/categories")({
 });
 
 function Categories() {
-  const [activeId, setActiveId] = useState<number | null>(null);
+  const { genre: activeId = null } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.id });
+  
   const genres = useGenres();
   const byGenre = useByGenre(activeId);
   const popular = usePopular();
@@ -40,7 +50,7 @@ function Categories() {
 
       <div className="flex flex-wrap gap-2 mt-8">
         <button
-          onClick={() => setActiveId(null)}
+          onClick={() => navigate({ search: { genre: null }, replace: true })}
           className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
             activeId === null
               ? "gradient-primary text-primary-foreground shadow-glow"
@@ -52,7 +62,7 @@ function Categories() {
         {genres.data?.map((g) => (
           <button
             key={g.id}
-            onClick={() => setActiveId(g.id)}
+            onClick={() => navigate({ search: { genre: g.id }, replace: true })}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
               activeId === g.id
                 ? "gradient-primary text-primary-foreground shadow-glow"
