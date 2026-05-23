@@ -116,7 +116,7 @@ function MoviePage() {
     );
   }
 
-  const fav = has(movie.id);
+  const fav = has(movie.id, "movie");
 
   return (
     <article>
@@ -200,7 +200,7 @@ function MoviePage() {
                 </button>
               )}
               <button
-                onClick={() => toggle(movie.id)}
+                onClick={() => toggle(movie.id, "movie")}
                 className={`inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold transition-all ${fav
                     ? "bg-primary/20 text-primary border border-primary/40"
                     : "glass-strong hover:bg-foreground/10"

@@ -49,13 +49,14 @@ export function MovieCard({ movie, size = "md", index = 0 }: Props) {
         <button
           onClick={(e) => {
             e.preventDefault();
-            toggle(movie.id);
+            e.stopPropagation();
+            toggle(movie.id, movie.type as "movie" | "tv");
           }}
           className="absolute top-3 right-3 w-8 h-8 grid place-items-center rounded-full glass-strong opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           aria-label="Favoritar"
         >
           <Heart
-            className={`w-4 h-4 transition-colors ${has(movie.id) ? "fill-primary text-primary" : "text-foreground"}`}
+            className={`w-4 h-4 transition-colors ${has(movie.id, movie.type as "movie" | "tv") ? "fill-primary text-primary" : "text-foreground"}`}
           />
         </button>
         <div className="absolute inset-x-0 bottom-0 p-4">

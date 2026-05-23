@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { db } from "@/db";
-import { movieViews, movieReviews } from "@/db/schema";
+import { movieViews, movieReviews, userFavorites } from "@/db/schema";
 import { eq, desc, and } from "drizzle-orm";
 
 export const incrementView = createServerFn({ method: "POST" })
@@ -59,20 +59,21 @@ export const getMovieStats = createServerFn({ method: "GET" })
 
 export const addReview = createServerFn({ method: "POST" })
   .inputValidator(
-    (data: { movieId: string; rating: number; comment?: string; authorName?: string }) => data,
+    (data: { movieId: string; rating: number; comment?: string; authorName?: string; authorEmail: string }) => data,
   )
   .handler(async ({ data }) => {
     try {
       const name = data.authorName?.trim() || "Anônimo";
+      const email = data.authorEmail.toLowerCase().trim();
       const existing = db
         .select()
         .from(movieReviews)
-        .where(and(eq(movieReviews.movieId, data.movieId), eq(movieReviews.authorName, name)))
+        .where(and(eq(movieReviews.movieId, data.movieId), eq(movieReviews.authorEmail, email)))
         .get();
 
       if (existing) {
         db.update(movieReviews)
-          .set({ rating: data.rating, comment: data.comment || "" })
+          .set({ rating: data.rating, comment: data.comment || "", authorName: name })
           .where(eq(movieReviews.id, existing.id))
           .run();
       } else {
@@ -82,6 +83,7 @@ export const addReview = createServerFn({ method: "POST" })
             rating: data.rating,
             comment: data.comment || "",
             authorName: name,
+            authorEmail: email,
           })
           .run();
       }
@@ -93,7 +95,7 @@ export const addReview = createServerFn({ method: "POST" })
   });
 
 export const deleteReview = createServerFn({ method: "POST" })
-  .inputValidator((data: { reviewId: number; authorName: string }) => data)
+  .inputValidator((data: { reviewId: number; authorEmail: string }) => data)
   .handler(async ({ data }) => {
     try {
       const existing = db
@@ -103,7 +105,7 @@ export const deleteReview = createServerFn({ method: "POST" })
         .get();
 
       if (!existing) return { success: false, error: "Avaliação não encontrada." };
-      if (existing.authorName !== data.authorName)
+      if (existing.authorEmail.toLowerCase().trim() !== data.authorEmail.toLowerCase().trim())
         return { success: false, error: "Você só pode excluir suas próprias avaliações." };
 
       db.delete(movieReviews).where(eq(movieReviews.id, data.reviewId)).run();
@@ -111,5 +113,107 @@ export const deleteReview = createServerFn({ method: "POST" })
     } catch (error) {
       console.error("Erro ao deletar review:", error);
       return { success: false, error: "Erro ao excluir avaliação." };
+    }
+  });
+
+export const toggleDbFavorite = createServerFn({ method: "POST" })
+  .inputValidator(
+    (data: { mediaId: string; mediaType: "movie" | "tv"; userEmail: string }) => data,
+  )
+  .handler(async ({ data }) => {
+    try {
+      const email = data.userEmail.toLowerCase().trim();
+      const existing = db
+        .select()
+        .from(userFavorites)
+        .where(
+          and(
+            eq(userFavorites.userEmail, email),
+            eq(userFavorites.mediaId, data.mediaId),
+            eq(userFavorites.mediaType, data.mediaType),
+          ),
+        )
+        .get();
+
+      if (existing) {
+        db.delete(userFavorites)
+          .where(eq(userFavorites.id, existing.id))
+          .run();
+        return { success: true, favorited: false };
+      } else {
+        db.insert(userFavorites)
+          .values({
+            userEmail: email,
+            mediaId: data.mediaId,
+            mediaType: data.mediaType,
+          })
+          .run();
+        return { success: true, favorited: true };
+      }
+    } catch (error) {
+      console.error("Erro ao alternar favorito no banco:", error);
+      return { success: false, favorited: false };
+    }
+  });
+
+export const getUserFavorites = createServerFn({ method: "GET" })
+  .inputValidator((data: { userEmail: string }) => data)
+  .handler(async ({ data }) => {
+    try {
+      const email = data.userEmail.toLowerCase().trim();
+      const favorites = db
+        .select()
+        .from(userFavorites)
+        .where(eq(userFavorites.userEmail, email))
+        .all();
+      return { success: true, favorites };
+    } catch (error) {
+      console.error("Erro ao buscar favoritos no banco:", error);
+      return { success: false, favorites: [] };
+    }
+  });
+
+export const syncUserFavorites = createServerFn({ method: "POST" })
+  .inputValidator(
+    (data: { userEmail: string; items: { mediaId: string; mediaType: "movie" | "tv" }[] }) => data,
+  )
+  .handler(async ({ data }) => {
+    try {
+      const email = data.userEmail.toLowerCase().trim();
+      
+      // Get existing favorites
+      const existing = db
+        .select()
+        .from(userFavorites)
+        .where(eq(userFavorites.userEmail, email))
+        .all();
+
+      const existingKeys = new Set(existing.map(f => `${f.mediaType}:${f.mediaId}`));
+
+      // Insert missing ones
+      for (const item of data.items) {
+        const key = `${item.mediaType}:${item.mediaId}`;
+        if (!existingKeys.has(key)) {
+          db.insert(userFavorites)
+            .values({
+              userEmail: email,
+              mediaId: item.mediaId,
+              mediaType: item.mediaType,
+            })
+            .run();
+        }
+      }
+
+      // Return complete updated list
+      const updated = db
+        .select()
+        .from(userFavorites)
+        .where(eq(userFavorites.userEmail, email))
+        .all();
+
+      return { success: true, favorites: updated };
+    } catch (error) {
+      console.error("Erro ao sincronizar favoritos no banco:", error);
+      return { success: false, favorites: [] };
     }
   });

@@ -9,6 +9,7 @@ import { WatchButton } from "@/components/MovieWatchButton";
 import { EpisodeBrowser } from "@/components/EpisodeBrowser";
 import { useTVDetails, useSimilarTV } from "@/hooks/useTmdb";
 import { AgeBadge } from "@/components/AgeBadge";
+import { ReviewsSection } from "@/components/ReviewsSection";
 
 type TVSearch = {
   season?: number | null;
@@ -65,7 +66,7 @@ function TVPage() {
   const { has, toggle } = useFavorites();
   const [trailerOpen, setTrailerOpen] = useState(false);
   const [shared, setShared] = useState(false);
-  const fav = has(id);
+  const fav = has(id, "tv");
 
   if (isLoading) {
     return (
@@ -189,7 +190,7 @@ function TVPage() {
                 </button>
               )}
               <button
-                onClick={() => toggle(id)}
+                onClick={() => toggle(id, "tv")}
                 className={`inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold transition-all ${fav
                     ? "bg-primary/20 text-primary border border-primary/40"
                     : "glass-strong hover:bg-foreground/10"
@@ -247,6 +248,9 @@ function TVPage() {
             )}
           </motion.div>
         </div>
+
+        {/* Reviews Section */}
+        <ReviewsSection movieId={id} />
 
         <div className="mt-16 -mx-4 sm:-mx-12">
           {!similar ? (

@@ -10,6 +10,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { ChatBot } from "@/components/chat/ChatBot";
+import { AuthProvider } from "@/hooks/useAuth";
 
 import appCss from "../styles.css?url";
 
@@ -109,13 +110,15 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <LoadingScreen />
-      <Navbar />
-      <main className="relative z-10">
-        <Outlet />
-      </main>
-      <Footer />
-      <ChatBot />
+      <AuthProvider>
+        <LoadingScreen />
+        <Navbar />
+        <main className="relative z-10">
+          <Outlet />
+        </main>
+        <Footer />
+        <ChatBot />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

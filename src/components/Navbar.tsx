@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Search, Heart, Menu, X, Film } from "lucide-react";
+import { Search, Heart, Menu, X, Film, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SearchOverlay } from "./SearchOverlay";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const links = [
   { to: "/", label: "Início" },
@@ -119,6 +126,44 @@ export function Navbar() {
               >
                 <Heart className="w-5 h-5" />
               </Link>
+
+              {/* User Session Dropdown */}
+              {(() => {
+                const { user, logout, setIsOpen } = useAuth();
+                return user ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full bg-foreground/5 hover:bg-foreground/10 border border-border/40 transition-colors cursor-pointer outline-none select-none">
+                        <span className="hidden lg:inline text-xs font-semibold max-w-[100px] truncate">{user.name}</span>
+                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary shrink-0 border border-primary/30 shadow-sm">
+                          {user.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                        </div>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-background/95 backdrop-blur-xl border border-border/80 p-1.5 rounded-xl shadow-elevated w-48 z-[100]">
+                      <div className="px-2.5 py-2 border-b border-border/40 mb-1.5">
+                        <p className="text-xs font-bold truncate text-foreground">{user.name}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
+                      </div>
+                      <DropdownMenuItem
+                        onClick={logout}
+                        className="flex items-center gap-2 text-destructive focus:text-destructive focus:bg-destructive/15 px-2.5 py-2 rounded-lg cursor-pointer text-xs font-semibold transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Sair da conta
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <button
+                    onClick={() => setIsOpen(true)}
+                    className="px-4 py-2 rounded-full border border-border/80 hover:bg-foreground/5 text-xs font-bold tracking-wider uppercase transition-colors shrink-0"
+                  >
+                    Entrar
+                  </button>
+                );
+              })()}
+
               <button
                 onClick={() => setOpen((v) => !v)}
                 className="md:hidden w-10 h-10 grid place-items-center rounded-full hover:bg-foreground/10 transition-colors"
@@ -147,7 +192,7 @@ export function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-0 right-0 bottom-0 w-72 z-50 glass-strong p-6 pt-24 md:hidden"
+              className="fixed top-0 right-0 bottom-0 w-72 z-50 glass-strong p-6 pt-24 md:hidden flex flex-col justify-between"
             >
               <div className="flex flex-col gap-1">
                 {links.map((l) => (
@@ -164,6 +209,44 @@ export function Navbar() {
                   </Link>
                 ))}
               </div>
+
+              {/* Mobile Drawer Auth */}
+              {(() => {
+                const { user, logout, setIsOpen } = useAuth();
+                return (
+                  <div className="pb-8 border-t border-border/40 pt-4 mt-auto">
+                    {user ? (
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-3 px-2">
+                          <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary border border-primary/30">
+                            {user.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold truncate text-foreground leading-tight">{user.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={logout}
+                          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-destructive/10 hover:bg-destructive/20 border border-destructive/20 text-destructive text-sm font-semibold transition-colors mt-2"
+                        >
+                          <LogOut className="w-4 h-4" /> Sair da conta
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setOpen(false);
+                          setIsOpen(true);
+                        }}
+                        className="w-full py-3 rounded-xl gradient-primary text-primary-foreground text-sm font-bold tracking-wider uppercase shadow-glow hover:scale-[1.02] transition-transform"
+                      >
+                        Entrar
+                      </button>
+                    )}
+                  </div>
+                );
+              })()}
             </motion.aside>
           </>
         )}
