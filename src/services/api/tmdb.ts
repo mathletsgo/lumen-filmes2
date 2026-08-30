@@ -16,8 +16,17 @@ import type {
 // ... (existing functions)
 
 export async function getPopularPeople(page = 1): Promise<TmdbPerson[]> {
-  const data = await tmdbFetch<TmdbPaginated<TmdbPerson>>("/person/popular", { page });
-  return data.results;
+  const [data1, data2] = await Promise.all([
+    tmdbFetch<TmdbPaginated<TmdbPerson>>("/person/popular", { page }),
+    tmdbFetch<TmdbPaginated<TmdbPerson>>("/person/popular", { page: page + 1 }),
+  ]);
+  const combined = [...data1.results, ...data2.results];
+  const seen = new Set<number>();
+  return combined.filter((p) => {
+    if (seen.has(p.id)) return false;
+    seen.add(p.id);
+    return !!p.profile_path && (p.known_for_department === "Acting" || !p.known_for_department);
+  });
 }
 
 export async function getPersonDetails(id: number | string): Promise<Person> {
@@ -38,6 +47,9 @@ export async function getPeopleByIds(ids: number[]): Promise<TmdbPerson[]> {
 import { mapTmdbMovie } from "./mappers";
 import { getCertification } from "./certifications";
 
+export const ANIME_GENRE_ID = 210024;
+export const ADULT_GENRE_ID = 181818;
+
 let _genreCache: Record<number, string> | null = null;
 let _genreCachePromise: Promise<Record<number, string>> | null = null;
 
@@ -46,6 +58,8 @@ export async function getGenreMap(): Promise<Record<number, string>> {
   if (_genreCachePromise) return _genreCachePromise;
   _genreCachePromise = tmdbFetch<{ genres: TmdbGenre[] }>("/genre/movie/list").then((data) => {
     _genreCache = Object.fromEntries(data.genres.map((g) => [g.id, g.name]));
+    _genreCache[ANIME_GENRE_ID] = "Anime";
+    _genreCache[ADULT_GENRE_ID] = "18+";
     _genreCachePromise = null;
     return _genreCache;
   });
@@ -54,7 +68,20 @@ export async function getGenreMap(): Promise<Record<number, string>> {
 
 export async function getGenres(): Promise<TmdbGenre[]> {
   const data = await tmdbFetch<{ genres: TmdbGenre[] }>("/genre/movie/list");
-  return data.genres;
+  const genres = [...data.genres];
+  if (!genres.some((g) => g.id === ANIME_GENRE_ID || g.name.toLowerCase() === "anime")) {
+    const animIndex = genres.findIndex((g) => g.id === 16);
+    const animeGenre: TmdbGenre = { id: ANIME_GENRE_ID, name: "Anime" };
+    if (animIndex !== -1) {
+      genres.splice(animIndex + 1, 0, animeGenre);
+    } else {
+      genres.unshift(animeGenre);
+    }
+  }
+  if (!genres.some((g) => g.id === ADULT_GENRE_ID || g.name === "18+")) {
+    genres.push({ id: ADULT_GENRE_ID, name: "18+" });
+  }
+  return genres;
 }
 
 async function listToMovies(list: TmdbMovie[]): Promise<Movie[]> {
@@ -105,12 +132,55 @@ export async function getUnreleased(page = 1): Promise<Movie[]> {
   return listToMovies(data.results);
 }
 
-export async function getByGenre(genreId: number, page = 1): Promise<Movie[]> {
-  const data = await tmdbFetch<TmdbPaginated<TmdbMovie>>("/discover/movie", {
-    with_genres: genreId,
-    sort_by: "popularity.desc",
+export interface DiscoverOptions {
+  page?: number;
+  sortBy?: "popularity.desc" | "vote_average.desc" | "primary_release_date.desc";
+  minVotes?: number;
+  withOriginalLanguage?: string;
+  withAnimation?: boolean;
+}
+
+export async function getByGenre(genreId: number, options: DiscoverOptions = {}): Promise<Movie[]> {
+  const { page = 1, sortBy = "popularity.desc", minVotes = 30, withOriginalLanguage, withAnimation } = options;
+  const params: Record<string, string | number | boolean | undefined> = {
+    sort_by: sortBy,
     page,
-  });
+    "vote_count.gte": minVotes,
+    include_adult: false,
+  };
+
+  if (withOriginalLanguage) {
+    params.with_original_language = withOriginalLanguage;
+  }
+
+  if (genreId === ADULT_GENRE_ID) {
+    params.certification_country = "BR";
+    params.certification = "18";
+    params.include_adult = true;
+  } else if (genreId === ANIME_GENRE_ID) {
+    params.with_genres = 16;
+    params.with_original_language = "ja";
+  } else if (withAnimation) {
+    params.with_genres = `16,${genreId}`;
+  } else {
+    params.with_genres = genreId;
+  }
+
+  let data = await tmdbFetch<TmdbPaginated<TmdbMovie>>("/discover/movie", params);
+
+  // Fallback if strict parameters returned no items
+  if (data.results.length === 0) {
+    if (genreId === ADULT_GENRE_ID) {
+      params.certification_country = "US";
+      params.certification = "R";
+      params["vote_count.gte"] = 1;
+      data = await tmdbFetch<TmdbPaginated<TmdbMovie>>("/discover/movie", params);
+    } else if (minVotes > 1) {
+      params["vote_count.gte"] = 1;
+      data = await tmdbFetch<TmdbPaginated<TmdbMovie>>("/discover/movie", params);
+    }
+  }
+
   return listToMovies(data.results);
 }
 

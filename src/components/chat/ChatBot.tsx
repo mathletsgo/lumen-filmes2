@@ -108,15 +108,15 @@ export function ChatBot() {
           scale: isVisible ? 1 : 0.5,
           y: isVisible ? 0 : 20
         }}
-        className="fixed bottom-6 right-6 z-50 p-4 rounded-full transition-all duration-500 shadow-glow bg-white/5 backdrop-blur-md border border-white/10 text-white hover:bg-white/20 hover:border-primary/50 group"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 p-2.5 sm:p-4 rounded-full transition-all duration-500 shadow-glow bg-white/10 sm:bg-white/5 backdrop-blur-md border border-white/15 sm:border-white/10 text-white hover:bg-white/20 hover:border-primary/50 group"
         onClick={() => setIsOpen(!isOpen)}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.92 }}
       >
         {isOpen ? (
-          <X size={24} className="group-hover:text-primary transition-colors" />
+          <X className="w-5 h-5 sm:w-6 sm:h-6 group-hover:text-primary transition-colors" />
         ) : (
-          <MessageCircle size={24} className="group-hover:text-primary transition-colors" />
+          <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 group-hover:text-primary transition-colors" />
         )}
       </motion.button>
 
@@ -128,7 +128,7 @@ export function ChatBot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-24 right-6 z-50 w-full max-w-[350px] sm:max-w-[400px] h-[500px] max-h-[calc(100vh-120px)] flex flex-col rounded-2xl overflow-hidden border border-white/10 bg-background/80 backdrop-blur-xl shadow-2xl"
+            className="fixed bottom-16 right-3 left-3 sm:left-auto sm:right-6 z-50 w-auto sm:w-full max-w-full sm:max-w-[400px] h-[450px] sm:h-[500px] max-h-[calc(100vh-80px)] flex flex-col rounded-2xl overflow-hidden border border-white/10 bg-background/90 sm:bg-background/80 backdrop-blur-xl shadow-2xl"
           >
             {/* Header */}
             <div className="flex items-center gap-3 p-4 bg-primary/10 border-b border-white/5">

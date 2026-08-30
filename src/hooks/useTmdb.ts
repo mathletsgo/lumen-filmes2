@@ -99,10 +99,13 @@ export const useTopRated = () =>
 export const useGenres = () =>
   useQuery({ queryKey: ["tmdb", "genres"], queryFn: () => getGenres(), staleTime: 1000 * 60 * 60 });
 
-export const useByGenre = (genreId: number | null) =>
+export const useByGenre = (
+  genreId: number | null,
+  options?: import("@/services/api/tmdb").DiscoverOptions,
+) =>
   useQuery({
-    queryKey: ["tmdb", "by_genre", genreId],
-    queryFn: () => getByGenre(genreId as number),
+    queryKey: ["tmdb", "by_genre", genreId, options],
+    queryFn: () => getByGenre(genreId as number, options),
     enabled: genreId !== null,
     staleTime: STALE,
     placeholderData: keepPreviousData,
@@ -182,10 +185,13 @@ export const useTVGenres = () =>
     staleTime: 1000 * 60 * 60,
   });
 
-export const useTVByGenre = (genreId: number | null) =>
+export const useTVByGenre = (
+  genreId: number | null,
+  options?: import("@/services/api/tvdb").TVDiscoverOptions,
+) =>
   useQuery({
-    queryKey: ["tmdb", "tv_by_genre", genreId],
-    queryFn: () => getTVByGenre(genreId as number),
+    queryKey: ["tmdb", "tv_by_genre", genreId, options],
+    queryFn: () => getTVByGenre(genreId as number, options),
     enabled: genreId !== null,
     staleTime: STALE,
     placeholderData: keepPreviousData,

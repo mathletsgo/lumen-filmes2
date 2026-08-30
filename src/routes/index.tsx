@@ -12,7 +12,8 @@ import {
   useUpcoming,
   useTrendingTV,
   usePopularTV,
-  useTopActors,
+  useTVAnime,
+  usePopularPeople,
 } from "@/hooks/useTmdb";
 import type { MediaItem, Movie, TVShow } from "@/services/api/types";
 
@@ -49,9 +50,10 @@ function Index() {
   const upcoming = useUpcoming();
   const unreleased = useUnreleased();
   const topRated = useTopRated();
-  const topActors = useTopActors();
+  const popularPeople = usePopularPeople();
   const trendingTV = useTrendingTV();
   const popularTV = usePopularTV();
+  const animeTV = useTVAnime();
 
   const popularMovies = popular.data ?? [];
   const nowPlayingMovies = nowPlaying.data ?? [];
@@ -97,6 +99,12 @@ function Index() {
           <MovieRow title="Séries em alta" movies={toMediaItems(trendingTV.data ?? [])} />
         )}
 
+        {animeTV.isLoading ? (
+          <MovieRowSkeleton title="Animes em alta" />
+        ) : (
+          <MovieRow title="Animes em alta" movies={toMediaItems(animeTV.data ?? [])} />
+        )}
+
         {nowPlaying.isLoading ? (
           <MovieRowSkeleton title="Em cartaz" />
         ) : (
@@ -118,10 +126,10 @@ function Index() {
           <MovieRow title="Mais bem avaliados" movies={toMediaItems(topRated.data ?? [])} />
         )}
 
-        {topActors.data && (
+        {popularPeople.data && popularPeople.data.length > 0 && (
           <ActorRow 
             title="Melhores atores" 
-            people={topActors.data} 
+            people={popularPeople.data} 
           />
         )}
       </div>

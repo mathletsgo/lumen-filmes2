@@ -37,23 +37,17 @@
 
 ## 🟡 Médios
 
-### 4. Race condition em favoritos (múltiplas abas)
+### 4. Race condition em favoritos (múltiplas abas) ✅ FIXED
 
-**Arquivo**: `src/lib/favorites.ts:20-21`
+**Arquivo**: `src/lib/favorites.ts`
 
-```typescript
-window.addEventListener("favorites-changed", handler);
-```
+**Problema**: O evento customizado `favorites-changed` só funcionava na mesma aba. Múltiplas abas abertas não sincronizavam o estado.
 
-O evento customizado `favorites-changed` só funciona na mesma aba. Se o usuário tiver duas abas abertas, as alterações não são sincronizadas.
+**Solução**: Implementada sincronização tripla:
+- `BroadcastChannel("lumen_favorites_channel")` para comunicação cross-tab instantânea.
+- Event listener nativo `window.addEventListener("storage")` como fallback.
+- **Optimistic UI Updates** para resposta visual sub-milissegundo com rollback em caso de falha no servidor.
 
-**Solução**: Usar `BroadcastChannel` API para sincronização cross-tab:
-
-```typescript
-const channel = new BroadcastChannel("favorites");
-channel.postMessage(ids);
-channel.addEventListener("message", (e) => setIds(e.data));
-```
 
 ---
 

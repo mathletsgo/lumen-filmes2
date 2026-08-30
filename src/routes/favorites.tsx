@@ -29,7 +29,7 @@ function Favorites() {
   });
 
   const isLoading = queries.some((q) => q.isLoading);
-  const list = queries.map((q) => q.data).filter(Boolean);
+  const list = queries.map((q) => q.data).filter((m): m is NonNullable<typeof m> => m !== undefined);
 
   return (
     <div className="pt-32 pb-16 px-4 sm:px-12 max-w-screen-2xl mx-auto">
