@@ -12,11 +12,11 @@ interface Props {
 export function ActorCard({ person, index = 0 }: Props) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.05 }}
-      className="group relative shrink-0 w-40 sm:w-48"
+      transition={{ duration: 0.35, delay: Math.min(index * 0.03, 0.3) }}
+      className="group relative shrink-0 w-40 sm:w-48 gpu-accelerated"
     >
       <Link
         to="/person/$id"
@@ -28,7 +28,8 @@ export function ActorCard({ person, index = 0 }: Props) {
             src={posterUrl(person.profile_path)}
             alt={person.name}
             loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            decoding="async"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted/20">

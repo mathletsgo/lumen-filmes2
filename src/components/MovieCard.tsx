@@ -25,7 +25,7 @@ export function MovieCard({ movie, size = "md", index = 0 }: Props) {
   };
 
   return (
-    <div className={`group relative shrink-0 ${widths[size]}`}>
+    <div className={`group relative shrink-0 ${widths[size]} gpu-accelerated`}>
       <Link
         to={isTV ? "/tv/$id" : "/movie/$id"}
         params={{ id: movie.id }}
@@ -35,6 +35,7 @@ export function MovieCard({ movie, size = "md", index = 0 }: Props) {
           src={movie.poster}
           alt={movie.title}
           loading="lazy"
+          decoding="async"
           width={512}
           height={768}
           className="w-full h-full object-cover"

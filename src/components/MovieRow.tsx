@@ -50,7 +50,8 @@ export function MovieRow({ title, movies, size = "md" }: Props) {
 
       <div
         ref={ref}
-        className="flex gap-4 overflow-x-auto scrollbar-hidden scroll-smooth px-4 sm:px-8 pb-2"
+        className="flex gap-4 overflow-x-auto scrollbar-hidden scroll-smooth px-4 sm:px-8 pb-2 overscroll-x-contain"
+        style={{ WebkitOverflowScrolling: "touch" }}
       >
         {movies.map((m, i) => (
           <div 

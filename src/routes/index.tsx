@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { HeroBanner } from "@/components/HeroBanner";
 import { MovieRow } from "@/components/MovieRow";
@@ -55,32 +56,48 @@ function Index() {
   const popularTV = usePopularTV();
   const animeTV = useTVAnime();
 
-  const popularMovies = popular.data ?? [];
-  const nowPlayingMovies = nowPlaying.data ?? [];
-  const trendingMovies = trending.data ?? [];
-  const popularTVItems = popularTV.data ?? [];
-  const trendingTVItems = trendingTV.data ?? [];
+  const [featured, setFeatured] = useState<MediaItem[]>([]);
 
-  const featuredPool = [
-    ...popularMovies,
-    ...nowPlayingMovies,
-    ...trendingMovies,
-    ...popularTVItems,
-    ...trendingTVItems,
-  ];
+  useEffect(() => {
+    if (featured.length > 0) return;
 
-  const ratedMovies = featuredPool.filter((item) => item.rating >= 6);
+    const popularMovies = popular.data ?? [];
+    const nowPlayingMovies = nowPlaying.data ?? [];
+    const trendingMovies = trending.data ?? [];
+    const popularTVItems = popularTV.data ?? [];
+    const trendingTVItems = trendingTV.data ?? [];
 
-  const featured: MediaItem[] = toMediaItems(
-    shuffleArray(ratedMovies.length >= 4 ? ratedMovies : featuredPool).slice(
-      0,
-      12
-    )
-  );
+    const featuredPool = [
+      ...popularMovies,
+      ...nowPlayingMovies,
+      ...trendingMovies,
+      ...popularTVItems,
+      ...trendingTVItems,
+    ];
+
+    if (featuredPool.length === 0) return;
+
+    // Deduplicate by type and id
+    const uniquePool = Array.from(
+      new Map(featuredPool.map((item) => [`${item.type}-${item.id}`, item])).values()
+    );
+
+    const ratedMovies = uniquePool.filter((item) => item.rating >= 6);
+    const poolToUse = ratedMovies.length >= 4 ? ratedMovies : uniquePool;
+
+    setFeatured(toMediaItems(shuffleArray(poolToUse).slice(0, 10)));
+  }, [
+    popular.data,
+    nowPlaying.data,
+    trending.data,
+    popularTV.data,
+    trendingTV.data,
+    featured.length,
+  ]);
 
   return (
     <div className="pb-10">
-      {popular.isLoading && nowPlaying.isLoading ? (
+      {featured.length === 0 && popular.isLoading && nowPlaying.isLoading ? (
         <HeroSkeleton />
       ) : (
         <HeroBanner movies={featured} />

@@ -66,17 +66,18 @@ export function HeroBanner({ movies, interval = 7000 }: Props) {
       <AnimatePresence mode="sync">
         <motion.div
           key={current.id}
-          initial={{ opacity: 0, scale: 1.08 }}
+          initial={{ opacity: 0, scale: 1.05 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 1.04 }}
-          transition={{ opacity: { duration: 1.2 }, scale: { duration: 8, ease: "linear" } }}
-          className="absolute inset-0"
+          exit={{ opacity: 0 }}
+          transition={{ opacity: { duration: 0.8, ease: "easeOut" }, scale: { duration: 6, ease: "easeOut" } }}
+          className="absolute inset-0 gpu-accelerated"
         >
           <img
             src={current.backdrop}
             alt={current.title}
             width={1920}
             height={1080}
+            decoding="async"
             className="absolute inset-0 w-full h-full object-cover"
           />
         </motion.div>
@@ -119,6 +120,9 @@ export function HeroBanner({ movies, interval = 7000 }: Props) {
 
 function SlideContent({ movie }: { movie: any }) {
   const { data: cert } = useCertification(movie.id, movie.type);
+  const isTV = movie.type === "tv";
+  const detailPath = isTV ? "/tv/$id" : "/movie/$id";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -132,20 +136,26 @@ function SlideContent({ movie }: { movie: any }) {
         Em destaque
       </div>
 
-      <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] sm:leading-[0.95] text-shadow-cinema">
-        {movie.title}
-      </h1>
+      <Link
+        to={detailPath}
+        params={{ id: String(movie.id) }}
+        className="group block"
+      >
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] sm:leading-[0.95] text-shadow-cinema group-hover:text-primary transition-colors">
+          {movie.title}
+        </h1>
+      </Link>
 
       <div className="flex flex-wrap items-center gap-3 mt-6 text-sm">
         <span className="flex items-center gap-1 font-semibold">
           <Star className="w-4 h-4 fill-accent text-accent" />
-          {movie.rating.toFixed(1)}
+          {typeof movie.rating === "number" ? movie.rating.toFixed(1) : "N/A"}
         </span>
         {movie.year && <span className="text-muted-foreground">{movie.year}</span>}
         {movie.duration && <span className="text-muted-foreground">{movie.duration}</span>}
         {cert && <AgeBadge code={cert} size="sm" />}
         <div className="flex flex-wrap gap-2">
-          {movie.genres.slice(0, 3).map((g: string) => (
+          {movie.genres?.slice(0, 3).map((g: string) => (
             <span key={g} className="px-2.5 py-0.5 rounded-full glass text-xs">
               {g}
             </span>
@@ -159,14 +169,13 @@ function SlideContent({ movie }: { movie: any }) {
 
       <div className="flex flex-row gap-2 sm:gap-3 mt-6 sm:mt-8 w-full sm:w-auto">
         <Link
-          to="/movie/$id"
-          params={{ id: movie.id }}
-          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-7 sm:py-3.5 rounded-full bg-transparent border border-white/20 backdrop-blur-md hover:bg-white/10 text-white text-xs sm:text-base font-semibold transition-all duration-300"
+          to={detailPath}
+          params={{ id: String(movie.id) }}
+          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:px-7 sm:py-3.5 rounded-full bg-primary/90 hover:bg-primary text-primary-foreground text-xs sm:text-base font-semibold shadow-lg hover:shadow-primary/30 transition-all duration-300"
         >
           <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
           Assistir agora
         </Link>
-
       </div>
     </motion.div>
   );
